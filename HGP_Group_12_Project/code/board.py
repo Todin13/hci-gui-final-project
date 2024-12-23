@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QFrame
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint
 from PyQt6.QtGui import QPainter, QColor, QBrush
 from piece import Piece
 
@@ -11,8 +11,8 @@ class Board(QFrame):  # base the board on a QFrame widget
     )  # signal sent when there is a new click location
 
     # TODO set the board width and height to be square
-    boardWidth = 0  # board is 0 squares wide # TODO this needs updating
-    boardHeight = 0  #
+    boardWidth = 7  # board is 7 squares wide 
+    boardHeight = 7  #board is 7 squares high
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
 
@@ -31,8 +31,8 @@ class Board(QFrame):  # base the board on a QFrame widget
 
         self.boardArray = (
             [[Piece(0, r, c) for c in range(7)] for r in range(7)]
-        )  # TODO - create a 2d int/Piece array to store the state of the game
-        self.printBoardArray()    # TODO - uncomment this method after creating the array above
+        )  # create a 2d int/Piece array to store the state of the game
+        self.printBoardArray()
 
     def printBoardArray(self):
         """prints the boardArray in an attractive way"""
@@ -105,7 +105,7 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.save()
                 painter.translate(col * squareWidth, row * squareHeight)
                 painter.setBrush(QBrush(QColor(255, 255, 255)))  # Set brush color
-                painter.drawRect(0, 0, squareWidth, squareHeight)  # Draw rectangles
+                painter.drawRect(0, 0, int(squareWidth), int(squareHeight))  # Draw rectangles
                 painter.restore()
 
     def drawPieces(self, painter):
@@ -117,6 +117,6 @@ class Board(QFrame):  # base the board on a QFrame widget
                 # TODO draw some pieces as ellipses
                 # TODO choose your color and set the painter brush to the correct color
                 radius = (self.squareWidth() - 2) / 2
-                center = QPoint(radius, radius)
-                painter.drawEllipse(center, radius, radius)
+                center = QPoint(int(radius), int(radius))
+                painter.drawEllipse(center, int(radius), int(radius))
                 painter.restore()
