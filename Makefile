@@ -6,7 +6,7 @@ prepare:
 
 run:
 	@echo "Starting the app"
-	poetry run python main.py
+	poetry run python Group_Assignment-HGP/Odin_Thomas_3168058-Catez_Benoit_xxxxxxx-Laumonier_Quentin_xxxxxxx/code/__main__.py
 
 check:
 	@echo "Running Black"
