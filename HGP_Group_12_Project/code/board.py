@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QFrame
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QPainter, QColor, QBrush
+from piece import Piece
 
 
 class Board(QFrame):  # base the board on a QFrame widget
@@ -29,7 +30,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.start()  # start the game which will start the timer
 
         self.boardArray = (
-            []
+            [[Piece(0) for _ in range(7)] for _ in range(7)]
         )  # TODO - create a 2d int/Piece array to store the state of the game
         # self.printBoardArray()    # TODO - uncomment this method after creating the array above
 
