@@ -11,8 +11,7 @@ Last edited: August 2017
 """
 
 import sys
-from PyQt5.QtWidgets import (QWidget, QLabel,
-                             QLineEdit, QApplication)
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QApplication
 
 
 class Example(QWidget):
@@ -32,7 +31,7 @@ class Example(QWidget):
         qle.textChanged[str].connect(self.onChanged)
 
         self.setGeometry(300, 300, 280, 170)
-        self.setWindowTitle('QLineEdit')
+        self.setWindowTitle("QLineEdit")
         self.show()
 
     def onChanged(self, text):
@@ -40,7 +39,7 @@ class Example(QWidget):
         self.lbl.adjustSize()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

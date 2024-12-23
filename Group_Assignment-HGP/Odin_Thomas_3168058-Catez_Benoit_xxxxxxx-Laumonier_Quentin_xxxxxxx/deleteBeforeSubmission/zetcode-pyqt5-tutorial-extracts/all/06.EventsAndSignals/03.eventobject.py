@@ -37,7 +37,7 @@ class Example(QWidget):
         self.setLayout(grid)
 
         self.setGeometry(300, 300, 350, 200)
-        self.setWindowTitle('Event object')
+        self.setWindowTitle("Event object")
         self.show()
 
     def mouseMoveEvent(self, e):
@@ -48,7 +48,7 @@ class Example(QWidget):
         self.label.setText(text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

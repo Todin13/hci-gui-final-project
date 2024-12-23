@@ -23,7 +23,7 @@ class Example(QWidget):
 
     def initUI(self):
         self.setGeometry(300, 300, 350, 100)
-        self.setWindowTitle('Colours')
+        self.setWindowTitle("Colours")
         self.show()
 
     def paintEvent(self, e):
@@ -34,7 +34,7 @@ class Example(QWidget):
 
     def drawRectangles(self, qp):
         col = QColor(0, 0, 0)
-        col.setNamedColor('#d4d4d4')
+        col.setNamedColor("#d4d4d4")
         qp.setPen(col)
 
         qp.setBrush(QColor(200, 0, 0))
@@ -47,7 +47,7 @@ class Example(QWidget):
         qp.drawRect(250, 15, 90, 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

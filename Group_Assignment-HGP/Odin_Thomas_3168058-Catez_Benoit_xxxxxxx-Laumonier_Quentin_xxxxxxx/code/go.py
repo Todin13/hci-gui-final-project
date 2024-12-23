@@ -18,7 +18,7 @@ class Go(QMainWindow):
         return self.scoreBoard
 
     def initUI(self):
-        '''Initiates application UI'''
+        """Initiates application UI"""
         self.board = Board(self)
         self.setCentralWidget(self.board)
 
@@ -28,19 +28,13 @@ class Go(QMainWindow):
 
         self.resize(800, 800)
         self.center()
-        self.setWindowTitle('Go')
+        self.setWindowTitle("Go")
         self.show()
 
-
     def center(self):
-        '''Centers the window on the screen'''
+        """Centers the window on the screen"""
         screen = QApplication.primaryScreen().availableGeometry()
         size = self.geometry()
         x = (screen.width() - size.width()) // 2
         y = (screen.height() - size.height()) // 2
         self.move(x, y)
-
-
-
-
-

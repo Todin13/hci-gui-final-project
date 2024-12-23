@@ -24,7 +24,7 @@ class Example(QWidget):
 
     def initUI(self):
         self.setGeometry(300, 300, 380, 250)
-        self.setWindowTitle('Bézier curve')
+        self.setWindowTitle("Bézier curve")
         self.show()
 
     def paintEvent(self, e):
@@ -42,7 +42,7 @@ class Example(QWidget):
         qp.drawPath(path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

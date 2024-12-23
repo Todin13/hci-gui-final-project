@@ -9,8 +9,7 @@ Website: zetcode.com
 Last edited: August 2017
 """
 
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout,
-                             QLabel, QApplication)
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QApplication
 from PyQt5.QtGui import QPixmap
 import sys
 
@@ -33,11 +32,11 @@ class Example(QWidget):
         self.setLayout(hbox)
 
         self.move(300, 200)
-        self.setWindowTitle('Red Rock')
+        self.setWindowTitle("Red Rock")
         self.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

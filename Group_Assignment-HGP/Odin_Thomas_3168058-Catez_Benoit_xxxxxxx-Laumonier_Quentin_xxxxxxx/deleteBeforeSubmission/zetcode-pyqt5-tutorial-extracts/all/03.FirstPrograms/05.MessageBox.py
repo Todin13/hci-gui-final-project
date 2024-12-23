@@ -1,4 +1,3 @@
-
 """
 ZetCode PyQt5 tutorial
 
@@ -22,19 +21,21 @@ class Example(QWidget):
 
         self.initUI()
 
-
     def initUI(self):
 
         self.setGeometry(300, 300, 250, 150)
-        self.setWindowTitle('Message box')
+        self.setWindowTitle("Message box")
         self.show()
-
 
     def closeEvent(self, event):
 
-        reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes |
-            QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(
+            self,
+            "Message",
+            "Are you sure to quit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
 
         if reply == QMessageBox.Yes:
             event.accept()
@@ -42,7 +43,7 @@ class Example(QWidget):
             event.ignore()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     ex = Example()

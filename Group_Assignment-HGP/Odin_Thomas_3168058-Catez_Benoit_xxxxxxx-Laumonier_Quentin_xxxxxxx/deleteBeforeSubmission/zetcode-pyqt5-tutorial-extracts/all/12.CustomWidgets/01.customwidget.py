@@ -8,8 +8,7 @@ Website: zetcode.com
 Last edited: August 2017
 """
 
-from PyQt5.QtWidgets import (QWidget, QSlider, QApplication,
-                             QHBoxLayout, QVBoxLayout)
+from PyQt5.QtWidgets import QWidget, QSlider, QApplication, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import QObject, Qt, pyqtSignal
 from PyQt5.QtGui import QPainter, QFont, QColor, QPen
 import sys
@@ -48,7 +47,7 @@ class BurningWidget(QWidget):
         MAX_CAPACITY = 700
         OVER_CAPACITY = 750
 
-        font = QFont('Serif', 7, QFont.Light)
+        font = QFont("Serif", 7, QFont.Light)
         qp.setFont(font)
 
         size = self.size()
@@ -75,8 +74,7 @@ class BurningWidget(QWidget):
             qp.setBrush(QColor(255, 255, 184))
             qp.drawRect(0, 0, till, h)
 
-        pen = QPen(QColor(20, 20, 20), 1,
-                   Qt.SolidLine)
+        pen = QPen(QColor(20, 20, 20), 1, Qt.SolidLine)
 
         qp.setPen(pen)
         qp.setBrush(Qt.NoBrush)
@@ -121,7 +119,7 @@ class Example(QWidget):
         self.setLayout(vbox)
 
         self.setGeometry(300, 300, 390, 210)
-        self.setWindowTitle('Burning widget')
+        self.setWindowTitle("Burning widget")
         self.show()
 
     def changeValue(self, value):
@@ -129,7 +127,7 @@ class Example(QWidget):
         self.wid.repaint()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

@@ -41,7 +41,7 @@ class Button(QPushButton):
         super().mousePressEvent(e)
 
         if e.button() == Qt.LeftButton:
-            print('press')
+            print("press")
 
 
 class Example(QWidget):
@@ -54,10 +54,10 @@ class Example(QWidget):
     def initUI(self):
         self.setAcceptDrops(True)
 
-        self.button = Button('Button', self)
+        self.button = Button("Button", self)
         self.button.move(100, 65)
 
-        self.setWindowTitle('Click or Move')
+        self.setWindowTitle("Click or Move")
         self.setGeometry(300, 300, 280, 150)
 
     def dragEnterEvent(self, e):
@@ -71,8 +71,8 @@ class Example(QWidget):
         e.accept()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     ex.show()
-    app.exec_() 
+    app.exec_()

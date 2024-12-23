@@ -33,15 +33,15 @@ class Example(QMainWindow):
         self.statusBar()
 
         self.setGeometry(300, 300, 290, 150)
-        self.setWindowTitle('Event sender')
+        self.setWindowTitle("Event sender")
         self.show()
 
     def buttonClicked(self):
         sender = self.sender()
-        self.statusBar().showMessage(sender.text() + ' was pressed')
+        self.statusBar().showMessage(sender.text() + " was pressed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

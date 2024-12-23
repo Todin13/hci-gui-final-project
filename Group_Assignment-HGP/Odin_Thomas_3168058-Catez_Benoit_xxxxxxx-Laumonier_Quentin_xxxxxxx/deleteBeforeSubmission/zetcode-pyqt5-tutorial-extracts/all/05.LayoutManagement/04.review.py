@@ -11,8 +11,14 @@ last edited: January 2015
 """
 
 import sys
-from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit,
-                             QTextEdit, QGridLayout, QApplication)
+from PyQt5.QtWidgets import (
+    QWidget,
+    QLabel,
+    QLineEdit,
+    QTextEdit,
+    QGridLayout,
+    QApplication,
+)
 
 
 class Example(QWidget):
@@ -23,9 +29,9 @@ class Example(QWidget):
         self.initUI()
 
     def initUI(self):
-        title = QLabel('Title')
-        author = QLabel('Author')
-        review = QLabel('Review')
+        title = QLabel("Title")
+        author = QLabel("Author")
+        review = QLabel("Review")
 
         titleEdit = QLineEdit()
         authorEdit = QLineEdit()
@@ -46,11 +52,11 @@ class Example(QWidget):
         self.setLayout(grid)
 
         self.setGeometry(300, 300, 350, 300)
-        self.setWindowTitle('Review')
+        self.setWindowTitle("Review")
         self.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

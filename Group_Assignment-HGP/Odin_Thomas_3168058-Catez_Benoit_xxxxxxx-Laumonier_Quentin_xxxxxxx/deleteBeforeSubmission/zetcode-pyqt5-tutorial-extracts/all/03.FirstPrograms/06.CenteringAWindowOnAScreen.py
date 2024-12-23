@@ -24,7 +24,7 @@ class Example(QWidget):
         self.resize(250, 150)
         self.center()
 
-        self.setWindowTitle('Center')
+        self.setWindowTitle("Center")
         self.show()
 
     def center(self):
@@ -34,7 +34,7 @@ class Example(QWidget):
         self.move(qr.topLeft())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

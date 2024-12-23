@@ -21,7 +21,7 @@ class Example(QMainWindow):
 
     def initUI(self):
         self.setGeometry(300, 300, 300, 200)
-        self.setWindowTitle('Context menu')
+        self.setWindowTitle("Context menu")
         self.show()
 
     def contextMenuEvent(self, event):
@@ -36,7 +36,7 @@ class Example(QMainWindow):
             qApp.quit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

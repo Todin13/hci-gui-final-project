@@ -25,7 +25,7 @@ class Example(QWidget):
         self.text = "Лев Николаевич Толстой\nАнна Каренина"
 
         self.setGeometry(300, 300, 280, 170)
-        self.setWindowTitle('Drawing text')
+        self.setWindowTitle("Drawing text")
         self.show()
 
     def paintEvent(self, event):
@@ -36,11 +36,11 @@ class Example(QWidget):
 
     def drawText(self, event, qp):
         qp.setPen(QColor(168, 34, 3))
-        qp.setFont(QFont('Decorative', 10))
+        qp.setFont(QFont("Decorative", 10))
         qp.drawText(event.rect(), Qt.AlignCenter, self.text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

@@ -22,20 +22,20 @@ class Example(QMainWindow):
     def initUI(self):
 
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage('Ready')
+        self.statusbar.showMessage("Ready")
 
         menubar = self.menuBar()
-        viewMenu = menubar.addMenu('View')
+        viewMenu = menubar.addMenu("View")
 
-        viewStatAct = QAction('View statusbar', self, checkable=True)
-        viewStatAct.setStatusTip('View statusbar')
+        viewStatAct = QAction("View statusbar", self, checkable=True)
+        viewStatAct.setStatusTip("View statusbar")
         viewStatAct.setChecked(True)
         viewStatAct.triggered.connect(self.toggleMenu)
 
         viewMenu.addAction(viewStatAct)
 
         self.setGeometry(300, 300, 300, 200)
-        self.setWindowTitle('Check menu')
+        self.setWindowTitle("Check menu")
         self.show()
 
     def toggleMenu(self, state):
@@ -46,7 +46,7 @@ class Example(QMainWindow):
             self.statusbar.hide()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

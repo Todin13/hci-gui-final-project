@@ -9,8 +9,15 @@ Website: zetcode.com
 Last edited: August 2017
 """
 
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
-                             QSizePolicy, QLabel, QFontDialog, QApplication)
+from PyQt5.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QPushButton,
+    QSizePolicy,
+    QLabel,
+    QFontDialog,
+    QApplication,
+)
 import sys
 
 
@@ -24,9 +31,8 @@ class Example(QWidget):
     def initUI(self):
         vbox = QVBoxLayout()
 
-        btn = QPushButton('Dialog', self)
-        btn.setSizePolicy(QSizePolicy.Fixed,
-                          QSizePolicy.Fixed)
+        btn = QPushButton("Dialog", self)
+        btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         btn.move(20, 20)
 
@@ -34,14 +40,14 @@ class Example(QWidget):
 
         btn.clicked.connect(self.showDialog)
 
-        self.lbl = QLabel('Knowledge only matters', self)
+        self.lbl = QLabel("Knowledge only matters", self)
         self.lbl.move(130, 20)
 
         vbox.addWidget(self.lbl)
         self.setLayout(vbox)
 
         self.setGeometry(300, 300, 250, 180)
-        self.setWindowTitle('Font dialog')
+        self.setWindowTitle("Font dialog")
         self.show()
 
     def showDialog(self):
@@ -50,7 +56,7 @@ class Example(QWidget):
             self.lbl.setFont(font)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

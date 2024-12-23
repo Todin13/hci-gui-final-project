@@ -1,4 +1,3 @@
-
 """
 ZetCode PyQt5 tutorial-deleteBeforeSubmission
 
@@ -10,8 +9,7 @@ Website: zetcode.com
 Last edited: August 2017
 """
 
-from PyQt5.QtWidgets import (QWidget, QLabel,
-                             QComboBox, QApplication)
+from PyQt5.QtWidgets import QWidget, QLabel, QComboBox, QApplication
 import sys
 
 
@@ -38,7 +36,7 @@ class Example(QWidget):
         combo.activated[str].connect(self.onActivated)
 
         self.setGeometry(300, 300, 300, 200)
-        self.setWindowTitle('QComboBox')
+        self.setWindowTitle("QComboBox")
         self.show()
 
     def onActivated(self, text):
@@ -46,7 +44,7 @@ class Example(QWidget):
         self.lbl.adjustSize()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

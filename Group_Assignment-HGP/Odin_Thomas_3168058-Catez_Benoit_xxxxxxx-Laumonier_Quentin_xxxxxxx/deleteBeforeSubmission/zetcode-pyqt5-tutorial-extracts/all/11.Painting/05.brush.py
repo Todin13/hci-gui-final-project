@@ -24,7 +24,7 @@ class Example(QWidget):
 
     def initUI(self):
         self.setGeometry(300, 300, 355, 280)
-        self.setWindowTitle('Brushes')
+        self.setWindowTitle("Brushes")
         self.show()
 
     def paintEvent(self, e):
@@ -71,7 +71,7 @@ class Example(QWidget):
         qp.drawRect(250, 195, 90, 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

@@ -10,8 +10,7 @@ Website: zetcode.com
 Last edited: August 2017
 """
 
-from PyQt5.QtWidgets import (QWidget, QPushButton,
-                             QFrame, QApplication)
+from PyQt5.QtWidgets import QWidget, QPushButton, QFrame, QApplication
 from PyQt5.QtGui import QColor
 import sys
 
@@ -27,19 +26,19 @@ class Example(QWidget):
 
         self.col = QColor(0, 0, 0)
 
-        redb = QPushButton('Red', self)
+        redb = QPushButton("Red", self)
         redb.setCheckable(True)
         redb.move(10, 10)
 
         redb.clicked[bool].connect(self.setColor)
 
-        greenb = QPushButton('Green', self)
+        greenb = QPushButton("Green", self)
         greenb.setCheckable(True)
         greenb.move(10, 60)
 
         greenb.clicked[bool].connect(self.setColor)
 
-        blueb = QPushButton('Blue', self)
+        blueb = QPushButton("Blue", self)
         blueb.setCheckable(True)
         blueb.move(10, 110)
 
@@ -47,11 +46,10 @@ class Example(QWidget):
 
         self.square = QFrame(self)
         self.square.setGeometry(150, 20, 100, 100)
-        self.square.setStyleSheet("QWidget { background-color: %s }" %
-                                  self.col.name())
+        self.square.setStyleSheet("QWidget { background-color: %s }" % self.col.name())
 
         self.setGeometry(300, 300, 280, 170)
-        self.setWindowTitle('Toggle button')
+        self.setWindowTitle("Toggle button")
         self.show()
 
     def setColor(self, pressed):
@@ -70,11 +68,10 @@ class Example(QWidget):
         else:
             self.col.setBlue(val)
 
-        self.square.setStyleSheet("QFrame { background-color: %s }" %
-                                  self.col.name())
+        self.square.setStyleSheet("QFrame { background-color: %s }" % self.col.name())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

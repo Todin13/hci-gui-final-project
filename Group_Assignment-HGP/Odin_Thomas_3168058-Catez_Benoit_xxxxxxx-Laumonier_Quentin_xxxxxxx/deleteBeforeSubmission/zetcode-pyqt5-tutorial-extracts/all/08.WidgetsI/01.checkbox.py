@@ -23,24 +23,24 @@ class Example(QWidget):
 
     def initUI(self):
 
-        cb = QCheckBox('Show title', self)
+        cb = QCheckBox("Show title", self)
         cb.move(20, 20)
         cb.toggle()
         cb.stateChanged.connect(self.changeTitle)
 
         self.setGeometry(300, 300, 250, 150)
-        self.setWindowTitle('QCheckBox')
+        self.setWindowTitle("QCheckBox")
         self.show()
 
     def changeTitle(self, state):
 
         if state == Qt.Checked:
-            self.setWindowTitle('QCheckBox')
+            self.setWindowTitle("QCheckBox")
         else:
-            self.setWindowTitle(' ')
+            self.setWindowTitle(" ")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())

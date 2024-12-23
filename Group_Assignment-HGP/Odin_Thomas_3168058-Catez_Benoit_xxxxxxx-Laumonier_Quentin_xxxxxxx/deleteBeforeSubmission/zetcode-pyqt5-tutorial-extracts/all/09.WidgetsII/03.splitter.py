@@ -9,8 +9,14 @@ Website: zetcode.com
 Last edited: August 2017
 """
 
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QFrame,
-                             QSplitter, QStyleFactory, QApplication)
+from PyQt5.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QFrame,
+    QSplitter,
+    QStyleFactory,
+    QApplication,
+)
 from PyQt5.QtCore import Qt
 import sys
 
@@ -46,11 +52,11 @@ class Example(QWidget):
         self.setLayout(hbox)
 
         self.setGeometry(300, 300, 300, 200)
-        self.setWindowTitle('QSplitter')
+        self.setWindowTitle("QSplitter")
         self.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = Example()
     sys.exit(app.exec_())
