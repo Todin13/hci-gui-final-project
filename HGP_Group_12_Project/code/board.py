@@ -30,9 +30,9 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.start()  # start the game which will start the timer
 
         self.boardArray = (
-            [[Piece(0) for _ in range(7)] for _ in range(7)]
+            [[Piece(0, r, c) for c in range(7)] for r in range(7)]
         )  # TODO - create a 2d int/Piece array to store the state of the game
-        # self.printBoardArray()    # TODO - uncomment this method after creating the array above
+        self.printBoardArray()    # TODO - uncomment this method after creating the array above
 
     def printBoardArray(self):
         """prints the boardArray in an attractive way"""
