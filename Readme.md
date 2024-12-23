@@ -5,13 +5,13 @@
 This project involves building a fully functional implementation of the classic board game Go, using a 7x7 board for simplicity and reduced complexity. The game is a part of the HCI & GUI Programming module and is worth 60% of the module grade.
 Assignment Details
 
-    Module: HCI & GUI Programming
-    Stage/Year: 3
-    Semester: 1
-    Assignment: 3 - Project
-    Deadline: 3 jannuary 2025
-    Submission: Via Moodle (group submissions only)
-    Weighting: 60% of the module grade
+- Module: HCI & GUI Programming
+- Stage/Year: 3
+- Semester: 1
+- Assignment: 3 - Project
+- Deadline: 3 jannuary 2025
+- Submission: Via Moodle (group submissions only)
+- Weighting: 60% of the module grade
 
 ## Features to Implement
 
