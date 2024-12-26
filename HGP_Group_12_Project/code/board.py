@@ -128,21 +128,14 @@ class Board(QFrame):  # base the board on a QFrame widget
             for col in range(0, len(self.boardArray[0])):
                 painter.save()
                 painter.translate(col * self.squareWidth(), row * self.squareHeight())
+                
                 # TODO draw some pieces as ellipses
                 # TODO choose your color and set the painter brush to the correct color
+
+                self.set_piece_color(painter)
+
                 radius = (self.squareWidth() - 2) / 2
                 center = QPoint(int(radius), int(radius))
-
-                # Set color based on player_turn and piece state
-                if self.player_turn == 0:  # Player turn 0: all circles white
-                    painter.setPen(QColor(255, 255, 255))  # Black outline
-                    painter.setBrush(QBrush(QColor(255, 255, 255)))  # White
-                elif self.player_turn == 1:  # Player turn 1: outline in black
-                    painter.setPen(QColor(0, 0, 0))  # Black outline
-                elif self.player_turn == 2:  # Player turn 2: fill circle in black
-                    painter.setBrush(QBrush(QColor(0, 0, 0)))  # Black fill
-
-
                 painter.drawEllipse(center, int(radius), int(radius))
                 painter.restore()
 
@@ -152,3 +145,16 @@ class Board(QFrame):  # base the board on a QFrame widget
         """
         color = "black" if self.player_turn == 2 else "white" 
         print(f"player {self.player_turn} ({color}) turn")
+
+    def set_piece_color(self, painter):
+        """ 
+        Set painter color in function of the player turn
+        """
+        # Set color based on player_turn and piece state
+        if self.player_turn == 0:  # Player turn 0: all circles white
+            painter.setPen(QColor(255, 255, 255))  # Black outline
+            painter.setBrush(QBrush(QColor(255, 255, 255)))  # White
+        elif self.player_turn == 1:  # Player turn 1: outline in black
+            painter.setPen(QColor(0, 0, 0))  # Black outline
+        elif self.player_turn == 2:  # Player turn 2: fill circle in black
+            painter.setBrush(QBrush(QColor(0, 0, 0)))  # Black fill
