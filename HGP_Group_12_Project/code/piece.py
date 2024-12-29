@@ -25,4 +25,4 @@ class Piece(object):
             return f"{self.name} Piece at position {self.position}"
         else:
             return f"{self.name} Piece "
-    
+
