@@ -34,16 +34,21 @@ class Go(QMainWindow):
 
     def center(self):
         """Centers the window on the screen"""
+        current_widget = self.stackedWidget.currentWidget()
+        if current_widget:
+            size = current_widget.sizeHint()
+            self.resize(size)
+
         screen = QApplication.primaryScreen().availableGeometry()
-        size = self.geometry()
-        x = (screen.width() - size.width()) // 2
-        y = (screen.height() - size.height()) // 2
+        window_size = self.geometry()
+        x = (screen.width() - window_size.width()) // 2
+        y = (screen.height() - window_size.height()) // 2
         self.move(x, y)
 
     def showPlayerNamesPage(self):
         self.stackedWidget.setCurrentWidget(self.playerNamesPage)
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
-        self.resize(self.playerNamesPage.sizeHint())  # Ajuste la taille de la fenêtre en fonction de la taille de la page
+        self.center()  # Centre la fenêtre
 
     def startGame(self, player1, player2):
         self.stackedWidget.setCurrentWidget(self.board)
@@ -52,7 +57,7 @@ class Go(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
         print(f"Game started with players: {player1} vs {player2}")
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
-        self.resize(QSize(800, 800))  # Définir les dimensions initiales pour la page du jeu de Go
+        self.center()  # Centre la fenêtre
 
     def resizeEvent(self, event):
         """Adjust the size of the window based on the current page"""
