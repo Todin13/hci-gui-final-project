@@ -1,6 +1,9 @@
 from PyQt6.QtWidgets import QFrame
-from PyQt6.QtCore import Qt, pyqtSignal, QSize
-from PyQt6.QtGui import QPainter, QPixmap
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
+from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
+from piece import Piece
+from game_logic import GameLogic
+import os
 
 # Dummy Piece class for demonstration
 class Piece:
@@ -39,6 +42,7 @@ class Board(QFrame):
     def initBoard(self):
         """Initializes the board."""
         self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth)] for r in range(self.boardHeight)]
+        self.logic = GameLogic(self.boardArray)
         self.printBoardArray()
 
     def printBoardArray(self):
@@ -77,23 +81,48 @@ class Board(QFrame):
 
 
     def mousePressEvent(self, event):
-        """Handle clicks within the square board area."""
-        if not (self.top_left_x <= event.position().x() <= self.top_left_x + self.square_side and
-                self.top_left_y <= event.position().y() <= self.top_left_y + self.square_side):
-            return  # Ignore clicks outside the square board
+        """this event is automatically called when the mouse is pressed"""
+        assert self.logic.board == self.boardArray
 
-        square_width = self.square_side / (self.boardWidth - 1)
-        square_height = self.square_side / (self.boardHeight - 1)
+        # Convert the mouse click position to a row and column
+        col = int(event.position().x() // self.squareWidth())
+        row = int(event.position().y() // self.squareHeight())
 
-        col = round((event.position().x() - self.top_left_x) / square_width)
-        row = round((event.position().y() - self.top_left_y) / square_height)
-
-        if 0 <= row < self.boardHeight and 0 <= col < self.boardWidth:
+        # Ensure the click is within the board boundaries
+        if self.logic.existing_position(row, col):
+            
             piece = self.boardArray[row][col]
             if piece.state == 0:  # Only place if the intersection is empty
                 piece.state = self.player_turn
                 self.player_turn = 3 - self.player_turn  # Toggle turn
                 self.update()  # Trigger repaint
+
+            if piece.state == 0:
+
+                new_piece = Piece(self.player_turn, row, col)
+
+                if self.logic.check_piece_placement(new_piece):
+                    # Set the piece state based on the player turn
+                    piece.change_state(self.player_turn)
+                    # self.printBoardArray()  # to debug
+
+                    # Log the click and update the board
+                    clickLoc = f"({row}, {col})"
+                    print("mousePressEvent() -  Location :" + clickLoc)
+                    self.clickLocationSignal.emit(
+                        clickLoc
+                    )  # prof put it but i don't like it need moddification
+                    self.update()  # Redraw the board
+
+                    # Alternate the player turn
+                    if self.player_turn == 1:
+                        self.player_turn = 2
+                        self.player2Time = 60  # reset timer for player 2
+                    else:
+                        self.player_turn = 1
+                        self.player1Time = 60  # reset timer for player 1
+
+
 
     def resetGame(self):
         self.initBoard()
