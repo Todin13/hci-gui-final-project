@@ -1,5 +1,15 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QFormLayout, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QPushButton,
+    QLabel,
+    QLineEdit,
+    QFormLayout,
+    QSpacerItem,
+    QSizePolicy,
+)
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
+
 
 class PlayerNamesPage(QWidget):
     startGameSignal = pyqtSignal(str, str)
@@ -12,15 +22,23 @@ class PlayerNamesPage(QWidget):
         layout = QVBoxLayout()
 
         # Ajouter un espace en haut pour centrer verticalement
-        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
 
         formLayout = QFormLayout()
 
         self.player1Name = QLineEdit()
         self.player2Name = QLineEdit()
 
-        self.player1Name.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        self.player2Name.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.player1Name.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        self.player2Name.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
 
         formLayout.addRow("Nom du joueur 1:", self.player1Name)
         formLayout.addRow("Nom du joueur 2:", self.player2Name)
@@ -36,7 +54,11 @@ class PlayerNamesPage(QWidget):
         layout.addWidget(button)
 
         # Ajouter un espace en bas pour centrer verticalement
-        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
 
         self.setLayout(layout)
 

@@ -17,7 +17,9 @@ class Piece(object):
             self.state = new_state
             self.name = self.__allPieces[self.state]
         else:
-            raise ValueError(f"Cannot change {self.name} piece in position {self.position} to {self.__allPieces[new_state]} piece as it's the same.")
+            raise ValueError(
+                f"Cannot change {self.name} piece in position {self.position} to {self.__allPieces[new_state]} piece as it's the same."
+            )
 
     def __str__(self):
         if self.position != (None, None):

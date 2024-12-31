@@ -5,6 +5,7 @@ from score_board import ScoreBoard
 from start_page import StartPage
 from player_names_page import PlayerNamesPage
 
+
 class Go(QMainWindow):
     def __init__(self):
         super().__init__()

@@ -5,6 +5,7 @@ from piece import Piece
 import os
 
 
+
 class Board(QFrame):  # base the board on a QFrame widget
     updateTimerSignal = pyqtSignal(int)  # signal sent when the timer is updated
     clickLocationSignal = pyqtSignal(str)  # signal sent when there is a new click location
@@ -73,7 +74,9 @@ class Board(QFrame):  # base the board on a QFrame widget
                 self.player2Time = 60  # reset timer for player 2
                 self.player_turn = 1  # switch to player 1
 
-        self.updateTimerSignal.emit(self.player1Time if self.player_turn == 1 else self.player2Time)
+        self.updateTimerSignal.emit(
+            self.player1Time if self.player_turn == 1 else self.player2Time
+        )
         self.print_player_turn()
 
     def paintEvent(self, event):
