@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QDockWidget, QVBoxLayout, QWidget, QLabel
 from PyQt6.QtCore import pyqtSlot
 
+
 class ScoreBoard(QDockWidget):
     """# base the score_board on a QDockWidget"""
 
