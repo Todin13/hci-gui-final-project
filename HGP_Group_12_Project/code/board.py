@@ -90,7 +90,7 @@ class Board(QFrame):
 
         # Ensure the click is within the board boundaries
         if self.logic.existing_position(row, col):
-            
+
             piece = self.boardArray[row][col]
             if piece.state == 0:  # Only place if the intersection is empty
                 piece.state = self.player_turn
@@ -121,8 +121,6 @@ class Board(QFrame):
                     else:
                         self.player_turn = 1
                         self.player1Time = 60  # reset timer for player 1
-
-
 
     def resetGame(self):
         self.initBoard()
