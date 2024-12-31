@@ -1,4 +1,5 @@
 from piece import Piece
+from copy import deepcopy
 
 class GameLogic:
     print("Game Logic Object Created")
@@ -43,20 +44,27 @@ class GameLogic:
 
         if self.is_encircled(new_piece):
             row, col = new_piece.position
-            for dir_row, dir_col in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+
+            game_board = deepcopy(self.board) # do not work coz copy pointer ?
+            game_board[row][col] = new_piece
+
+            at_least_one_opposite = False            
+            for dir_row, dir_col in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, 1), (1, -1), (1, 1), (-1,-1)]:
                 new_row, new_col = row + dir_row, col + dir_col
                 if self.existing_position(new_row, new_col):
                     oposite_piece = self.board[new_row][new_col]
                     if oposite_piece.state == 3 - new_piece.state:
-                        break 
-
-            game_board = self.board.copy() # do not work coz copy pointer ?
-            game_board[row][col] = new_piece
-
-            if self.is_encircled(oposite_piece, game_board=game_board):
-                return False
-            else: 
+                        at_least_one_opposite = True
+                        if self.is_encircled(oposite_piece, game_board=game_board):
+                            return False
+            
+            if at_least_one_opposite:
                 return True
+                        
+            
+            if self.is_encircled(new_piece, game_board=game_board):
+                return True
+            
         else:
             return False
             
@@ -75,7 +83,7 @@ class GameLogic:
             raise ValueError(f"{piece} cannot be in visited")
         
         if game_board == None:
-            game_board = self.board.copy() # do not work coz copy pointer ?
+            game_board = deepcopy(self.board) # do not work coz copy pointer ?
         
         visited.add(piece)
 
@@ -106,7 +114,6 @@ class GameLogic:
                 game_board[row][col] = piece
                 return self.is_encircled(neighbor_piece, visited, visit, game_board)
             else:
-                print("last")
                 return True
 
 
