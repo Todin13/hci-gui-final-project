@@ -1,0 +1,18 @@
+correct board print :
+    make stars (2:2)(2:7)(7:2)(7:7)
+game logic
+    circle
+    suicide (verify eye)
+    ko
+    score making
+
+wood in background
+have the pieces in 3D
+
+detrmine winner
+
+undo redo move 
+
+"how to" / rule
+
+pass turn

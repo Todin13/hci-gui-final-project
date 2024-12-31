@@ -11,8 +11,8 @@ class Board(QFrame):  # base the board on a QFrame widget
     clickLocationSignal = pyqtSignal(str)  # signal sent when there is a new click location
 
     # TODO set the board width and height to be square
-    boardWidth = 7  # board is 7 squares wide
-    boardHeight = 7  # board is 7 squares high
+    boardWidth = 8  # board is 8 squares wide not 7 because 7 will create a 8x8 game and we want a 9x9 game
+    boardHeight = 8  # board is 8 squares high not 7 because 7 will create a 8x8 game and we want a 9x9 game
     timerSpeed = 1000  # the timer updates every 1 second
     player1Time = 60  # player 1 has 60 seconds to play
     player2Time = 60  # player 2 has 60 seconds to play
@@ -36,7 +36,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         """initiates board"""
         self.timer = QTimer(self)  # create a timer for the game
         self.timer.timeout.connect(self.timerEvent)  # connect timeout signal to timerEvent method
-        self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth)] for r in range(self.boardHeight)]  # create a 2d int/Piece array to store the state of the game
+        self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth+1)] for r in range(self.boardHeight+1)]  # create a 2d int/Piece array to store the state of the game of size board game + 1 as we play on intersections 
         self.printBoardArray() # for debug
 
     def printBoardArray(self):
@@ -96,89 +96,11 @@ class Board(QFrame):  # base the board on a QFrame widget
             # Get the piece at the clicked position
             piece = self.boardArray[row][col]
 
-            # Check if the piece is already placed
-            if piece.state == 0:
-                # Set the piece state based on the player turn
-                piece.change_state(self.player_turn)
-                self.printBoardArray()
-                captured = self.capture_pieces(row, col)
-                if captured:
-                    self.ko = (row, col)
-                if self.ko and self.ko == (row, col):
-                    print("Ko rule applied. Cannot capture immediately.")
-                    piece.change_state(0)
-                    self.ko = None
-                else:
-                    for r, c in captured:
-                        self.boardArray[r][c].change_state(0)
-                    clickLoc = f"({row}, {col})"
-                    print("mousePressEvent() -  Location :" + clickLoc)
-                    self.clickLocationSignal.emit(clickLoc)
-                    self.update()
-                    if self.player_turn == 1:
-                        self.player_turn = 2
-                        self.player2Time = 60
-                    else:
-                        self.player_turn = 1
-                        self.player1Time = 60
-
-                    if self.is_game_over():
-                        black_score, white_score = self.count_score()
-                        print(f"Game over! Black score: {black_score}, White score: {white_score}")
-                        # Add logic to display the winner
-
     def resetGame(self):
-        self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth)] for r in range(self.boardHeight)]
+        self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth+1)] for r in range(self.boardHeight+1)]
         self.printBoardArray() # for debug
-        self.player1Time = 60  # reset player 1 timer
-        self.player2Time = 60  # reset player 2 timer
-
-    def capture_pieces(self, row, col):
-        captured = []
-        to_visit = [(row, col)]
-        visited = set()
-        liberties = 0
-
-        while to_visit:
-            r, c = to_visit.pop()
-            if (r, c) in visited:
-                continue
-            visited.add((r, c))
-            piece = self.boardArray[r][c]
-            if piece.state == 0:
-                liberties += 1
-            else:
-                for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                    nr, nc = r + dr, c + dc
-                    if 0 <= nr < self.boardHeight and 0 <= nc < self.boardWidth:
-                        if (nr, nc) not in visited:
-                            to_visit.append((nr, nc))
-
-        if liberties == 0:
-            for r, c in visited:
-                if self.boardArray[r][c].state != 0:
-                    captured.append((r, c))
-
-        return captured
-
-    def is_game_over(self):
-        for row in range(self.boardHeight):
-            for col in range(self.boardWidth):
-                if self.boardArray[row][col].state == 0:
-                    return False
-        return True
-
-    def count_score(self):
-        black_score = 0
-        white_score = 0
-        for row in range(self.boardHeight):
-            for col in range(self.boardWidth):
-                piece = self.boardArray[row][col]
-                if piece.state == 1:
-                    white_score += 1
-                elif piece.state == 2:
-                    black_score += 1
-        return black_score, white_score
+        self.player1Time = 120  # reset player 1 timer
+        self.player2Time = 120  # reset player 2 timer
 
     def drawBoardSquares(self, painter):
         """draw all the square on the board"""
