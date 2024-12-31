@@ -4,7 +4,6 @@ class Piece(object):
     No piece state = 0
     White piece state = 1
     Black piece state = 2
-    
     """
 
     def __init__(self, state: int, row: int | None = None, col: int | None = None):
@@ -16,7 +15,7 @@ class Piece(object):
     def change_state(self, new_state: int):
         if new_state != self.state:
             self.state = new_state
-            self.name = self.__allPieces[self.state] 
+            self.name = self.__allPieces[self.state]
         else:
             raise ValueError(f"Cannot change {self.name} piece in position {self.position} to {self.__allPieces[new_state]} piece as it's the same.")
 
@@ -25,4 +24,3 @@ class Piece(object):
             return f"{self.name} Piece at position {self.position}"
         else:
             return f"{self.name} Piece "
-

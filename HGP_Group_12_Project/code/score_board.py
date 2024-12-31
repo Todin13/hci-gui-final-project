@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QDockWidget, QVBoxLayout, QWidget, QLabel
+from PyQt6.QtWidgets import QDockWidget, QVBoxLayout, QWidget, QLabel, QHBoxLayout
 from PyQt6.QtCore import pyqtSlot
+
 
 class ScoreBoard(QDockWidget):
     """# base the score_board on a QDockWidget"""
@@ -20,10 +21,18 @@ class ScoreBoard(QDockWidget):
         # create two labels which will be updated by signals
         self.label_clickLocation = QLabel("Click Location: ")
         self.label_timeRemaining = QLabel("Time remaining: ")
+        self.label_player1 = QLabel("Player 1: ")
+        self.label_player2 = QLabel("Player 2: ")
 
         self.mainWidget.setLayout(self.mainLayout)
         self.mainLayout.addWidget(self.label_clickLocation)
         self.mainLayout.addWidget(self.label_timeRemaining)
+
+        playerLayout = QHBoxLayout()
+        playerLayout.addWidget(self.label_player1)
+        playerLayout.addWidget(self.label_player2)
+        self.mainLayout.addLayout(playerLayout)
+
         self.setWidget(self.mainWidget)
 
     def make_connection(self, board):
