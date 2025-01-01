@@ -106,6 +106,8 @@ class Board(QFrame):
                     piece.change_state(self.player_turn)
                     # self.printBoardArray()  # to debug
 
+                    self.logic.capturing_territory(new_piece)
+
                     # Log the click and update the board
                     clickLoc = f"({row}, {col})"
                     print("mousePressEvent() -  Location :" + clickLoc)

@@ -24,7 +24,6 @@ class GameLogic:
 
         # check if the last move created a ko and if this move is in the ko
         if self.ko_state and is_in_ko:
-            self.ko_state = False
             return False
 
         # if the move is ko or if  last move is ko changing ko state
@@ -86,7 +85,7 @@ class GameLogic:
             old_board_state = tuple(tuple(piece.state for piece in row) for row in self.board)
 
             if new_board_state == old_board_state:
-                print("KO")
+                # print("KO") # debug
                 return True
             else:
                 return False
@@ -182,3 +181,26 @@ class GameLogic:
             return True
         else:
             return False
+
+    def capturing_territory(self, new_piece: Piece):
+        """
+        Capture pieces encircled implementation
+        """
+
+        row, col = new_piece.position
+
+        for dir_row, dir_col in [
+                (-1, 0),
+                (1, 0),
+                (0, -1),
+                (0, 1),
+            ]:
+                new_row, new_col = row + dir_row, col + dir_col
+                if self.existing_position(new_row, new_col):
+                    oposite_piece = self.board[new_row][new_col]
+                    if oposite_piece.state == 3 - new_piece.state:
+                        res = self.is_encircled(oposite_piece)
+                        if res[0]:
+                            for captured_piece in res[1]:
+                                captured_row, captured_col = captured_piece.position
+                                self.board[captured_row][captured_col].change_state(0)
