@@ -12,7 +12,7 @@ class GameLogic:
         self.top = len(board)  # getting the max index + 1
         self.ko_state = False  # ko state round before, init as false
 
-    def check_piece_placement(self, new_piece: Piece):
+    def check_piece_placement(self, new_piece: Piece, hover=False):
         """
         Function that will check a movement's validity
         """
@@ -27,7 +27,7 @@ class GameLogic:
             return False
 
         # if the move is ko or if  last move is ko changing ko state
-        if is_in_ko or self.ko_state:
+        if (is_in_ko or self.ko_state) and not hover:
             self.ko_state = not self.ko_state
 
         return True

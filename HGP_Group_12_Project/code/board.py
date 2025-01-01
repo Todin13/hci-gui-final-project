@@ -166,7 +166,7 @@ class Board(QFrame):
 
         # Validate hover position
         if self.logic.existing_position(row, col):
-            if self.logic.check_piece_placement(Piece(self.player_turn, row, col)) and self.boardArray[row][col].state == 0:  # Only hover if position is empty and respect game rules
+            if self.logic.check_piece_placement(Piece(self.player_turn, row, col), hover=True) and self.boardArray[row][col].state == 0:  # Only hover if position is empty and respect game rules
                 self.hover_row = row
                 self.hover_col = col
             else:
