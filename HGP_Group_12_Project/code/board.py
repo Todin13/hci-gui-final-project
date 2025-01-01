@@ -136,7 +136,9 @@ class Board(QFrame):
                     captured_positions = self.logic.capturing_territory(new_piece)
 
                     if captured_positions:
+                        self.setMouseTracking(False)
                         self.handleCapturedPieces(captured_positions)
+                        self.setMouseTracking(True)
 
                     # Log the click and update the board
                     clickLoc = f"({row}, {col})"
