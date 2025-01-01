@@ -3,7 +3,6 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
-import os
 
 
 class Board(QFrame):
@@ -34,6 +33,12 @@ class Board(QFrame):
             print("Failed to load white_stone.png")
         if self.black_stone_pixmap.isNull():
             print("Failed to load black_stone.png")
+
+        self.hover_row = -1  # Default no hover
+        self.hover_col = -1  # Default no hover
+        self.transparent_piece_color = 1  # Default hover as white (1 for white, 2 for black)
+        self.setMouseTracking(True)  # Enable mouse tracking
+
 
     def initBoard(self):
         """Initializes the board."""
@@ -78,6 +83,7 @@ class Board(QFrame):
         self.drawBoardLines(painter)
         self.drawStars(painter)
         self.drawPieces(painter)
+        self.drawHoverPiece(painter)
 
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
@@ -95,9 +101,14 @@ class Board(QFrame):
         """this event is automatically called when the mouse is pressed"""
         assert self.logic.board == self.boardArray
 
-        # Convert the mouse click position to a row and column
-        col = int(event.position().x() // self.squareWidth())
-        row = int(event.position().y() // self.squareHeight())
+        if not (self.top_left_x <= event.position().x() <= self.top_left_x + self.square_side and
+                self.top_left_y <= event.position().y() <= self.top_left_y + self.square_side):
+            return  # Ignore clicks outside the square board
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+        col = round((event.position().x() - self.top_left_x) / square_width)
+        row = round((event.position().y() - self.top_left_y) / square_height)
 
         # Ensure the click is within the board boundaries
         if self.logic.existing_position(row, col):
@@ -130,6 +141,58 @@ class Board(QFrame):
                     else:
                         self.player_turn = 1
                         self.player1Time = 60  # reset timer for player 1
+
+    def mouseMoveEvent(self, event):
+        """Track the mouse position and determine the hovered position."""
+        mouse_x, mouse_y = event.position().x(), event.position().y()
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        col = int((mouse_x - self.top_left_x) / square_width)
+        row = int((mouse_y - self.top_left_y) / square_height)
+
+        # Validate hover position
+        if 0 <= row < self.boardHeight and 0 <= col < self.boardWidth:
+            if self.boardArray[row][col].state == 0:  # Only hover if position is empty
+                self.hover_row = row
+                self.hover_col = col
+            else:
+                self.hover_row = -1
+                self.hover_col = -1
+        else:
+            self.hover_row = -1
+            self.hover_col = -1
+
+        self.update()  # Trigger repaint
+ 
+    def drawHoverPiece(self, painter):
+        """Draw a semi-transparent piece at the hovered position if valid."""
+        if self.hover_row == -1 or self.hover_col == -1:
+            return
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        center_x = self.top_left_x + self.hover_col * square_width
+        center_y = self.top_left_y + self.hover_row * square_height
+        size = min(square_width, square_height) * 0.9
+
+        self.transparent_piece_color = self.player_turn
+
+        pixmap = (
+            self.white_stone_pixmap
+            if self.transparent_piece_color == 1
+            else self.black_stone_pixmap
+        )
+
+        x = center_x - size / 2
+        y = center_y - size / 2
+
+        painter.setOpacity(0.5)  # Semi-transparent effect
+        painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+        painter.setOpacity(1.0)  # Reset opacity to normal
+
 
     def resetGame(self):
         self.initBoard()
