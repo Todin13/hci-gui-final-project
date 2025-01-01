@@ -149,12 +149,12 @@ class Board(QFrame):
         square_width = self.square_side / (self.boardWidth - 1)
         square_height = self.square_side / (self.boardHeight - 1)
 
-        col = int((mouse_x - self.top_left_x) / square_width)
-        row = int((mouse_y - self.top_left_y) / square_height)
+        col = round((mouse_x - self.top_left_x) / square_width)
+        row = round((mouse_y - self.top_left_y) / square_height)
 
         # Validate hover position
-        if 0 <= row < self.boardHeight and 0 <= col < self.boardWidth:
-            if self.boardArray[row][col].state == 0:  # Only hover if position is empty
+        if self.logic.existing_position(row, col):
+            if self.logic.check_piece_placement(Piece(self.player_turn, row, col)) and self.boardArray[row][col].state == 0:  # Only hover if position is empty and respect game rules
                 self.hover_row = row
                 self.hover_col = col
             else:
