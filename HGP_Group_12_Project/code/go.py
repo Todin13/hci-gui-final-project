@@ -5,7 +5,6 @@ from score_board import ScoreBoard
 from start_page import StartPage
 from player_names_page import PlayerNamesPage
 
-
 class Go(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -56,9 +55,24 @@ class Go(QMainWindow):
         self.board.start()
         self.scoreBoard.make_connection(self.board)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
+        self.scoreBoard.passTurnSignal.connect(self.pass_turn)
+        self.scoreBoard.resetGameSignal.connect(self.resetGame)
         print(f"Game started with players: {player1} vs {player2}")
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
+
+    def pass_turn(self):
+        self.board.player_turn = 3 - self.board.player_turn  # Switch turn
+        self.board.print_player_turn()
+        self.scoreBoard.updateTurn(self.board.player_turn)
+
+    def resetGame(self):
+        self.board.resetGame()
+        self.board.player_turn = 1  # Ensure white player starts first
+        self.board.print_player_turn()
+        self.scoreBoard.updatePrisoners(0, 0)
+        self.scoreBoard.updateTerritory(0, 0)
+        self.scoreBoard.updateTurn(self.board.player_turn)
 
     def resizeEvent(self, event):
         """Adjust the size of the window based on the current page"""
