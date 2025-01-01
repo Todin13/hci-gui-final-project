@@ -5,6 +5,7 @@ from piece import Piece
 from game_logic import GameLogic
 import os
 
+
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
@@ -21,7 +22,9 @@ class Board(QFrame):
         self.ko = None
 
         # Load assets
-        self.background_pixmap = QPixmap("HGP_Group_12_Project/Assets/Goban_background.png")
+        self.background_pixmap = QPixmap(
+            "HGP_Group_12_Project/Assets/Goban_background.png"
+        )
         self.white_stone_pixmap = QPixmap("HGP_Group_12_Project/Assets/white_stone.png")
         self.black_stone_pixmap = QPixmap("HGP_Group_12_Project/Assets/black_stone.png")
 
@@ -34,14 +37,24 @@ class Board(QFrame):
 
     def initBoard(self):
         """Initializes the board."""
-        self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth)] for r in range(self.boardHeight)]
+        self.boardArray = [
+            [Piece(0, r, c) for c in range(self.boardWidth)]
+            for r in range(self.boardHeight)
+        ]
         self.logic = GameLogic(self.boardArray)
         self.printBoardArray()
 
     def printBoardArray(self):
         """Prints the boardArray for debugging."""
         print("boardArray:")
-        print("\n".join(["\t".join([str(cell.state) for cell in row]) for row in self.boardArray]))
+        print(
+            "\n".join(
+                [
+                    "\t".join([str(cell.state) for cell in row])
+                    for row in self.boardArray
+                ]
+            )
+        )
 
     def squareWidth(self):
         return self.contentsRect().width() / self.boardWidth
@@ -69,9 +82,14 @@ class Board(QFrame):
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
         if not self.background_pixmap.isNull():
-            painter.drawPixmap(self.rect(), self.background_pixmap.scaled(
-                self.size(), Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation))
-
+            painter.drawPixmap(
+                self.rect(),
+                self.background_pixmap.scaled(
+                    self.size(),
+                    Qt.AspectRatioMode.IgnoreAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                ),
+            )
 
     def mousePressEvent(self, event):
         """this event is automatically called when the mouse is pressed"""
@@ -139,7 +157,6 @@ class Board(QFrame):
             y = int(self.top_left_y + row * square_height)
             painter.drawLine(self.top_left_x, y, self.top_left_x + self.square_side, y)
 
-
     def drawPieces(self, painter):
         """Draw pieces centered on intersections within the square board."""
         square_width = self.square_side / (self.boardWidth - 1)
@@ -166,13 +183,7 @@ class Board(QFrame):
 
     def drawStars(self, painter):
         """Draw black dots (stars) at specific intersections on the board."""
-        star_positions = [
-            (3, 3),
-            (7, 3),
-            (5, 5),
-            (3, 7),
-            (7, 7)
-        ]
+        star_positions = [(3, 3), (7, 3), (5, 5), (3, 7), (7, 7)]
 
         square_width = self.square_side / (self.boardWidth - 1)
         square_height = self.square_side / (self.boardHeight - 1)
@@ -183,8 +194,12 @@ class Board(QFrame):
         for row, col in star_positions:
             x = self.top_left_x + (col - 1) * square_width
             y = self.top_left_y + (row - 1) * square_height
-            size = min(square_width, square_height) * 0.1  # Star size as a fraction of square size
-            painter.drawEllipse(int(x - size / 2), int(y - size / 2), int(size), int(size))
+            size = (
+                min(square_width, square_height) * 0.1
+            )  # Star size as a fraction of square size
+            painter.drawEllipse(
+                int(x - size / 2), int(y - size / 2), int(size), int(size)
+            )
 
     def print_player_turn(self):
         color = "white" if self.player_turn == 1 else "black"
