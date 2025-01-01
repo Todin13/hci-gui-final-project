@@ -5,19 +5,27 @@ game logic
 done    circle
 done    suicide (verify eye)
 done    ko
-    score making
+    score making (handicaps)
 
 done wood in background
 done have the pieces in 3D
 
-detrmine winner
+detrmine winner (japanese rules)
 
 undo redo move 
 
 "how to" / rule
 
-pass turn
+done pass turn
 
-have shadow stone where mouse is
+end game when 2 passes
 
-add effects when pieces does something
+done have shadow stone where mouse is
+
+done add effects when pieces does something
+
+scoreboard gui
+
+speed go 
+
+winner animation
