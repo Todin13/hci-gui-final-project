@@ -2,142 +2,208 @@ from PyQt6.QtWidgets import QFrame
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
+from game_logic import GameLogic
 import os
 
 
+class Board(QFrame):
+    updateTimerSignal = pyqtSignal(int)
+    clickLocationSignal = pyqtSignal(str)
 
-class Board(QFrame):  # base the board on a QFrame widget
-    updateTimerSignal = pyqtSignal(int)  # signal sent when the timer is updated
-    clickLocationSignal = pyqtSignal(str)  # signal sent when there is a new click location
+    boardWidth = 9  # 9x9 Goban
+    boardHeight = 9
+    player_turn = 1  # 1 for white, 2 for black
+    isStarted = False
 
-    # TODO set the board width and height to be square
-    boardWidth = 8  # board is 8 squares wide not 7 because 7 will create a 8x8 game and we want a 9x9 game
-    boardHeight = 8  # board is 8 squares high not 7 because 7 will create a 8x8 game and we want a 9x9 game
-    timerSpeed = 1000  # the timer updates every 1 second
-    player1Time = 60  # player 1 has 60 seconds to play
-    player2Time = 60  # player 2 has 60 seconds to play
-    player_turn = 0  # player turn 0 for nobody game not started
-    isStarted = False  # game is not currently started
-
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super().__init__(parent)
+        self.margin = 40
         self.initBoard()
-        self.ko = None  # Variable to keep track of the last capture
-        self.setStyleSheet("background-color: #D2B48C;")  # Set background color
-        self.white_stone_pixmap = QPixmap(os.path.join("images", "white_stone.jpg"))
-        self.black_stone_pixmap = QPixmap(os.path.join("images", "black_stone.jpg"))
+        self.ko = None
 
+        # Load assets
+        self.background_pixmap = QPixmap(
+            "HGP_Group_12_Project/Assets/Goban_background.png"
+        )
+        self.white_stone_pixmap = QPixmap("HGP_Group_12_Project/Assets/white_stone.png")
+        self.black_stone_pixmap = QPixmap("HGP_Group_12_Project/Assets/black_stone.png")
+
+        if self.background_pixmap.isNull():
+            print("Failed to load Goban_background.png")
         if self.white_stone_pixmap.isNull():
-            print("Failed to load white_stone.jpg")
+            print("Failed to load white_stone.png")
         if self.black_stone_pixmap.isNull():
-            print("Failed to load black_stone.jpg")
+            print("Failed to load black_stone.png")
 
     def initBoard(self):
-        """initiates board"""
-        self.timer = QTimer(self)  # create a timer for the game
-        self.timer.timeout.connect(self.timerEvent)  # connect timeout signal to timerEvent method
-        self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth+1)] for r in range(self.boardHeight+1)]  # create a 2d int/Piece array to store the state of the game of size board game + 1 as we play on intersections 
-        self.printBoardArray() # for debug
+        """Initializes the board."""
+        self.boardArray = [
+            [Piece(0, r, c) for c in range(self.boardWidth)]
+            for r in range(self.boardHeight)
+        ]
+        self.logic = GameLogic(self.boardArray)
+        self.printBoardArray()
 
     def printBoardArray(self):
-        """prints the boardArray in an attractive way"""
+        """Prints the boardArray for debugging."""
         print("boardArray:")
-        print("\n".join(["\t".join([str(cell) for cell in row]) for row in self.boardArray]))
+        print(
+            "\n".join(
+                [
+                    "\t".join([str(cell.state) for cell in row])
+                    for row in self.boardArray
+                ]
+            )
+        )
 
     def squareWidth(self):
-        """returns the width of one square in the board"""
         return self.contentsRect().width() / self.boardWidth
 
     def squareHeight(self):
-        """returns the height of one square of the board"""
         return self.contentsRect().height() / self.boardHeight
 
-    def start(self):
-        """starts game"""
-        self.isStarted = True  # set the boolean which determines if the game has started to TRUE
-        self.resetGame()  # reset the game
-        self.timer.start(self.timerSpeed)  # start the timer with the correct speed
-        print("start () - timer is started")
-        self.player_turn = 1  # Start with white piece
-        self.print_player_turn()
-
-    def timerEvent(self):
-        """this event is automatically called when the timer is updated. based on the timerSpeed variable"""
-        if self.player_turn == 1:
-            self.player1Time -= 1
-            if self.player1Time <= 0:
-                self.player1Time = 60  # reset timer for player 1
-                self.player_turn = 2  # switch to player 2
-        else:
-            self.player2Time -= 1
-            if self.player2Time <= 0:
-                self.player2Time = 60  # reset timer for player 2
-                self.player_turn = 1  # switch to player 1
-
-        self.updateTimerSignal.emit(
-            self.player1Time if self.player_turn == 1 else self.player2Time
-        )
-        self.print_player_turn()
-
     def paintEvent(self, event):
-        """paints the board and the pieces of the game"""
         painter = QPainter(self)
-        self.drawBoardSquares(painter)
+
+        # Calculate the square playable area within the margins
+        side = min(self.width() - 2 * self.margin, self.height() - 2 * self.margin)
+        self.square_side = side
+        self.top_left_x = (self.width() - side) // 2
+        self.top_left_y = (self.height() - side) // 2
+
+        # Draw the background to fill the entire widget
+        self.drawBackground(painter)
+
+        # Draw the board grid and pieces
+        self.drawBoardLines(painter)
+        self.drawStars(painter)
         self.drawPieces(painter)
+
+    def drawBackground(self, painter):
+        """Draw the background image covering the entire widget."""
+        if not self.background_pixmap.isNull():
+            painter.drawPixmap(
+                self.rect(),
+                self.background_pixmap.scaled(
+                    self.size(),
+                    Qt.AspectRatioMode.IgnoreAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                ),
+            )
 
     def mousePressEvent(self, event):
         """this event is automatically called when the mouse is pressed"""
+        assert self.logic.board == self.boardArray
+
         # Convert the mouse click position to a row and column
         col = int(event.position().x() // self.squareWidth())
         row = int(event.position().y() // self.squareHeight())
 
         # Ensure the click is within the board boundaries
-        if 0 <= row < self.boardHeight and 0 <= col < self.boardWidth:
-            # Get the piece at the clicked position
+        if self.logic.existing_position(row, col):
+
             piece = self.boardArray[row][col]
 
-    def resetGame(self):
-        self.boardArray = [[Piece(0, r, c) for c in range(self.boardWidth+1)] for r in range(self.boardHeight+1)]
-        self.printBoardArray() # for debug
-        self.player1Time = 120  # reset player 1 timer
-        self.player2Time = 120  # reset player 2 timer
+            if piece.state == 0:
 
-    def drawBoardSquares(self, painter):
-        """draw all the square on the board"""
-        squareWidth = self.squareWidth()
-        squareHeight = self.squareHeight()
+                new_piece = Piece(self.player_turn, row, col)
+
+                if self.logic.check_piece_placement(new_piece):
+                    # Set the piece state based on the player turn
+                    piece.change_state(self.player_turn)
+                    # self.printBoardArray()  # to debug
+
+                    self.logic.capturing_territory(new_piece)
+
+                    # Log the click and update the board
+                    clickLoc = f"({row}, {col})"
+                    print("mousePressEvent() -  Location :" + clickLoc)
+                    self.clickLocationSignal.emit(
+                        clickLoc
+                    )  # prof put it but i don't like it need moddification
+                    self.update()  # Redraw the board
+
+                    # Alternate the player turn
+                    if self.player_turn == 1:
+                        self.player_turn = 2
+                        self.player2Time = 60  # reset timer for player 2
+                    else:
+                        self.player_turn = 1
+                        self.player1Time = 60  # reset timer for player 1
+
+    def resetGame(self):
+        self.initBoard()
+        self.player_turn = 1
+        self.isStarted = False
+        self.update()
+
+    def start(self):
+        self.isStarted = True
+        self.resetGame()
+        print("Game started")
+
+    def drawBoardLines(self, painter):
+        """Draw the Go board lines (9x9 grid for intersections) within the margins."""
+        painter.setPen(Qt.GlobalColor.black)
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        for col in range(self.boardWidth):
+            x = int(self.top_left_x + col * square_width)
+            painter.drawLine(x, self.top_left_y, x, self.top_left_y + self.square_side)
+
         for row in range(self.boardHeight):
-            for col in range(self.boardWidth):
-                painter.save()
-                painter.translate(col * squareWidth, row * squareHeight)
-                painter.setBrush(QBrush(QColor(238, 238, 210)))  # Light brown color
-                painter.drawRect(0, 0, int(squareWidth), int(squareHeight))
-                painter.restore()
+            y = int(self.top_left_y + row * square_height)
+            painter.drawLine(self.top_left_x, y, self.top_left_x + self.square_side, y)
 
     def drawPieces(self, painter):
-        """draw the pieces on the board"""
+        """Draw pieces centered on intersections within the square board."""
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
         for row in range(len(self.boardArray)):
             for col in range(len(self.boardArray[0])):
-                painter.save()
-                painter.translate(col * self.squareWidth(), row * self.squareHeight())
-
-                # Set the piece color based on its state
                 piece = self.boardArray[row][col]
-                if piece.state == 1:
+                if piece.state == 1:  # White stone
                     pixmap = self.white_stone_pixmap
-                elif piece.state == 2:
+                elif piece.state == 2:  # Black stone
                     pixmap = self.black_stone_pixmap
                 else:
-                    pixmap = QPixmap()
+                    continue
 
-                if not pixmap.isNull():
-                    painter.drawPixmap(0, 0, pixmap.scaled(self.squareWidth(), self.squareHeight(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-                painter.restore()
+                # Calculate the center of the intersection
+                center_x = self.top_left_x + col * square_width
+                center_y = self.top_left_y + row * square_height
+                size = min(square_width, square_height) * 0.9
+
+                x = center_x - size / 2
+                y = center_y - size / 2
+                painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+
+    def drawStars(self, painter):
+        """Draw black dots (stars) at specific intersections on the board."""
+        star_positions = [(3, 3), (7, 3), (5, 5), (3, 7), (7, 7)]
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        painter.setBrush(Qt.GlobalColor.black)
+        painter.setPen(Qt.GlobalColor.black)
+
+        for row, col in star_positions:
+            x = self.top_left_x + (col - 1) * square_width
+            y = self.top_left_y + (row - 1) * square_height
+            size = (
+                min(square_width, square_height) * 0.1
+            )  # Star size as a fraction of square size
+            painter.drawEllipse(
+                int(x - size / 2), int(y - size / 2), int(size), int(size)
+            )
 
     def print_player_turn(self):
-        """Print for debug the player turn"""
-        color = "black" if self.player_turn == 2 else "white"
-        print(f"player {self.player_turn} ({color}) turn")
+        color = "white" if self.player_turn == 1 else "black"
+        print(f"Player {self.player_turn} ({color}) turn")
 
     def sizeHint(self):
         return QSize(800, 800)
