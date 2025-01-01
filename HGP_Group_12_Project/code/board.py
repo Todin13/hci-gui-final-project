@@ -5,13 +5,6 @@ from piece import Piece
 from game_logic import GameLogic
 import os
 
-# Dummy Piece class for demonstration
-class Piece:
-    def __init__(self, state, row, col):
-        self.state = state  # 0 for empty, 1 for white, 2 for black
-        self.row = row
-        self.col = col
-
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
@@ -92,10 +85,6 @@ class Board(QFrame):
         if self.logic.existing_position(row, col):
 
             piece = self.boardArray[row][col]
-            if piece.state == 0:  # Only place if the intersection is empty
-                piece.state = self.player_turn
-                self.player_turn = 3 - self.player_turn  # Toggle turn
-                self.update()  # Trigger repaint
 
             if piece.state == 0:
 
