@@ -13,7 +13,7 @@ class GameLogic:
         self.prisoners_p1 = 0  # Counter for Player 1's prisoners
         self.prisoners_p2 = 0  # Counter for Player 2's prisoners
 
-    def check_piece_placement(self, new_piece: Piece):
+    def check_piece_placement(self, new_piece: Piece, hover=False):
         """
         Function that will check a movement's validity
         """
@@ -27,8 +27,8 @@ class GameLogic:
         if self.ko_state and is_in_ko:
             return False
 
-        # if the move is ko or if last move is ko changing ko state
-        if is_in_ko or self.ko_state:
+        # if the move is ko or if  last move is ko changing ko state
+        if (is_in_ko or self.ko_state) and not hover:
             self.ko_state = not self.ko_state
 
         return True
@@ -192,6 +192,8 @@ class GameLogic:
         Capture pieces encircled implementation
         """
 
+        captured_positions = []
+
         row, col = new_piece.position
 
         for dir_row, dir_col in [
@@ -208,11 +210,15 @@ class GameLogic:
                     if res[0]:
                         for captured_piece in res[1]:
                             captured_row, captured_col = captured_piece.position
+                            captured_positions.append((captured_row, captured_col))
                             self.board[captured_row][captured_col].change_state(0)
+        
                             if captured_piece.state == 1:
                                 self.prisoners_p2 += 1
                             elif captured_piece.state == 2:
                                 self.prisoners_p1 += 1
+
+        return captured_positions
 
     def count_prisoners(self):
         """Count the number of prisoners for each player"""
