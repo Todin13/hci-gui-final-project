@@ -21,15 +21,16 @@ class Board(QFrame):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.margin = 40
         self.initBoard()
         self.ko = None
 
         # Load assets
-        self.background = QPixmap("HGP_Group_12_Project/Assets/Goban_background.png")
+        self.background_pixmap = QPixmap("HGP_Group_12_Project/Assets/Goban_background.png")
         self.white_stone_pixmap = QPixmap("HGP_Group_12_Project/Assets/white_stone.png")
         self.black_stone_pixmap = QPixmap("HGP_Group_12_Project/Assets/black_stone.png")
 
-        if self.background.isNull():
+        if self.background_pixmap.isNull():
             print("Failed to load Goban_background.png")
         if self.white_stone_pixmap.isNull():
             print("Failed to load white_stone.png")
@@ -55,23 +56,28 @@ class Board(QFrame):
     def paintEvent(self, event):
         painter = QPainter(self)
 
-        # Calculate the square playable area
-        side = min(self.width(), self.height()) - 40  # Ensure space for borders
+        # Calculate the square playable area within the margins
+        side = min(self.width() - 2 * self.margin, self.height() - 2 * self.margin)
         self.square_side = side
         self.top_left_x = (self.width() - side) // 2
         self.top_left_y = (self.height() - side) // 2
 
-        # Set clipping region to ensure we draw only within the square
-        painter.setClipRect(self.top_left_x, self.top_left_y, side, side)
-
+        # Draw the background to fill the entire widget
         self.drawBackground(painter)
+
+        # Draw the board grid and pieces
         self.drawBoardLines(painter)
+        self.drawStars(painter)
         self.drawPieces(painter)
 
 
+
     def drawBackground(self, painter):
-        """Draw the background image."""
-        painter.drawPixmap(self.rect(), self.background)
+        """Draw the background image covering the entire widget."""
+        if not self.background_pixmap.isNull():
+            painter.drawPixmap(self.rect(), self.background_pixmap.scaled(
+                self.size(), Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation))
+
 
     def mousePressEvent(self, event):
         """Handle clicks within the square board area."""
@@ -106,7 +112,7 @@ class Board(QFrame):
         print("Game started")
 
     def drawBoardLines(self, painter):
-        """Draw the grid lines within the square board."""
+        """Draw the Go board lines (9x9 grid for intersections) within the margins."""
         painter.setPen(Qt.GlobalColor.black)
 
         square_width = self.square_side / (self.boardWidth - 1)
@@ -119,6 +125,7 @@ class Board(QFrame):
         for row in range(self.boardHeight):
             y = int(self.top_left_y + row * square_height)
             painter.drawLine(self.top_left_x, y, self.top_left_x + self.square_side, y)
+
 
     def drawPieces(self, painter):
         """Draw pieces centered on intersections within the square board."""
@@ -138,11 +145,35 @@ class Board(QFrame):
                 # Calculate the center of the intersection
                 center_x = self.top_left_x + col * square_width
                 center_y = self.top_left_y + row * square_height
-                size = min(square_width, square_height) * 0.6  # Scale stone size slightly smaller
+                size = min(square_width, square_height) * 0.9
 
                 x = center_x - size / 2
                 y = center_y - size / 2
                 painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+
+    def drawStars(self, painter):
+        """Draw black dots (stars) at specific intersections on the board."""
+        star_positions = [
+            (3, 3),
+            (7, 3),
+            (5, 5),
+            (3, 7),
+            (7, 7)
+        ]
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        painter.setBrush(Qt.GlobalColor.black)
+        painter.setPen(Qt.GlobalColor.black)
+
+        for row, col in star_positions:
+            x = self.top_left_x + (col - 1) * square_width
+            y = self.top_left_y + (row - 1) * square_height
+            size = min(square_width, square_height) * 0.1  # Star size as a fraction of square size
+            painter.drawEllipse(int(x - size / 2), int(y - size / 2), int(size), int(size))
+
+
 
 
     def print_player_turn(self):
