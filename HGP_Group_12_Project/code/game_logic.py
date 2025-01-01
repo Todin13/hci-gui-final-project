@@ -24,6 +24,7 @@ class GameLogic:
 
         # check if the last move created a ko and if this move is in the ko
         if self.ko_state and is_in_ko:
+            self.ko_state = False
             return False
 
         # if the move is ko or if  last move is ko changing ko state
@@ -36,7 +37,59 @@ class GameLogic:
         """
         Implementation of the ko rule
         """
-        pass
+
+        board_game = deepcopy(self.board)
+        row, col = new_piece.position
+        board_game[row][col] = new_piece
+        deleted_pieces = []
+
+        for dir_row, dir_col in [
+                (-1, 0),
+                (1, 0),
+                (0, -1),
+                (0, 1),
+            ]:
+                new_row, new_col = row + dir_row, col + dir_col
+                if self.existing_position(new_row, new_col):
+                    oposite_piece = board_game[new_row][new_col]
+                    if oposite_piece.state == 3 - new_piece.state:
+                        res = self.is_encircled(oposite_piece, game_board=board_game)
+                        if res[0] and len(res[1]) == 1:
+                            del_piece = deepcopy(res[1][0])
+                            deleted_pieces.append(del_piece)
+                            del_row, del_col = del_piece.position
+                            board_game[del_row][del_col] = Piece(0, del_row, del_col)
+
+        if len(deleted_pieces) != 1:
+            return False
+        else:
+            piece = deleted_pieces[0]
+            old_row, old_col = piece.position
+            board_game[old_row][old_col] = piece
+            for dir_row, dir_col in [
+                (-1, 0),
+                (1, 0),
+                (0, -1),
+                (0, 1),
+            ]:
+                new_row, new_col = old_row + dir_row, old_col + dir_col
+                if self.existing_position(new_row, new_col):
+                    oposite_piece = board_game[new_row][new_col]
+                    if oposite_piece.state == 3 - piece.state:
+                        res = self.is_encircled(oposite_piece, game_board=board_game)
+                        if res[0] and len(res[1]) == 1:
+                            del_piece = deepcopy(res[1][0])
+                            del_row, del_col = del_piece.position
+                            board_game[del_row][del_col] = Piece(0, del_row, del_col)
+
+            new_board_state = tuple(tuple(piece.state for piece in row) for row in board_game)
+            old_board_state = tuple(tuple(piece.state for piece in row) for row in self.board)
+
+            if new_board_state == old_board_state:
+                print("KO")
+                return True
+            else:
+                return False
 
     def suicide(self, new_piece: Piece):
         """
@@ -44,7 +97,7 @@ class GameLogic:
         """
 
         # check if piece or territory is encircled
-        if self.is_encircled(new_piece):
+        if self.is_encircled(new_piece)[0]:
             row, col = new_piece.position
 
             game_board = deepcopy(self.board)  # do not work coz copy pointer ?
@@ -61,7 +114,7 @@ class GameLogic:
                 if self.existing_position(new_row, new_col):
                     oposite_piece = self.board[new_row][new_col]
                     if oposite_piece.state == 3 - new_piece.state:
-                        if self.is_encircled(oposite_piece, game_board=game_board):
+                        if self.is_encircled(oposite_piece, game_board=game_board)[0]:
                             return False
 
             # if not encircling at least one piec on the with the new piece then suicidal move
@@ -100,7 +153,7 @@ class GameLogic:
             if self.existing_position(new_row, new_col):
                 neighbor_piece = game_board[new_row][new_col]
                 if neighbor_piece.state == 0:
-                    return False
+                    return False, [p for p in visited]
                 elif neighbor_piece.state == oposite_state:
                     encircled += 1
                 elif neighbor_piece.state == state:
@@ -112,14 +165,14 @@ class GameLogic:
                 encircled += 1
 
         if encircled == 4:
-            return True
+            return True, [p for p in visited]
         else:
             if not visit == set():
                 neighbor_piece = visit.pop()
                 game_board[row][col] = piece
                 return self.is_encircled(neighbor_piece, visited, visit, game_board)
             else:
-                return True
+                return True, [p for p in visited]
 
     def existing_position(self, row, col):
         """
