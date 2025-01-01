@@ -191,6 +191,8 @@ class GameLogic:
         Capture pieces encircled implementation
         """
 
+        captured_positions = []
+
         row, col = new_piece.position
 
         for dir_row, dir_col in [
@@ -207,4 +209,6 @@ class GameLogic:
                     if res[0]:
                         for captured_piece in res[1]:
                             captured_row, captured_col = captured_piece.position
+                            captured_positions.append((captured_row, captured_col))
                             self.board[captured_row][captured_col].change_state(0)
+        return captured_positions
