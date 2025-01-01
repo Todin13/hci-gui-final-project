@@ -43,21 +43,21 @@ class GameLogic:
         deleted_pieces = []
 
         for dir_row, dir_col in [
-                (-1, 0),
-                (1, 0),
-                (0, -1),
-                (0, 1),
-            ]:
-                new_row, new_col = row + dir_row, col + dir_col
-                if self.existing_position(new_row, new_col):
-                    oposite_piece = board_game[new_row][new_col]
-                    if oposite_piece.state == 3 - new_piece.state:
-                        res = self.is_encircled(oposite_piece, game_board=board_game)
-                        if res[0] and len(res[1]) == 1:
-                            del_piece = deepcopy(res[1][0])
-                            deleted_pieces.append(del_piece)
-                            del_row, del_col = del_piece.position
-                            board_game[del_row][del_col] = Piece(0, del_row, del_col)
+            (-1, 0),
+            (1, 0),
+            (0, -1),
+            (0, 1),
+        ]:
+            new_row, new_col = row + dir_row, col + dir_col
+            if self.existing_position(new_row, new_col):
+                oposite_piece = board_game[new_row][new_col]
+                if oposite_piece.state == 3 - new_piece.state:
+                    res = self.is_encircled(oposite_piece, game_board=board_game)
+                    if res[0] and len(res[1]) == 1:
+                        del_piece = deepcopy(res[1][0])
+                        deleted_pieces.append(del_piece)
+                        del_row, del_col = del_piece.position
+                        board_game[del_row][del_col] = Piece(0, del_row, del_col)
 
         if len(deleted_pieces) != 1:
             return False
@@ -81,8 +81,12 @@ class GameLogic:
                             del_row, del_col = del_piece.position
                             board_game[del_row][del_col] = Piece(0, del_row, del_col)
 
-            new_board_state = tuple(tuple(piece.state for piece in row) for row in board_game)
-            old_board_state = tuple(tuple(piece.state for piece in row) for row in self.board)
+            new_board_state = tuple(
+                tuple(piece.state for piece in row) for row in board_game
+            )
+            old_board_state = tuple(
+                tuple(piece.state for piece in row) for row in self.board
+            )
 
             if new_board_state == old_board_state:
                 # print("KO") # debug
@@ -190,17 +194,17 @@ class GameLogic:
         row, col = new_piece.position
 
         for dir_row, dir_col in [
-                (-1, 0),
-                (1, 0),
-                (0, -1),
-                (0, 1),
-            ]:
-                new_row, new_col = row + dir_row, col + dir_col
-                if self.existing_position(new_row, new_col):
-                    oposite_piece = self.board[new_row][new_col]
-                    if oposite_piece.state == 3 - new_piece.state:
-                        res = self.is_encircled(oposite_piece)
-                        if res[0]:
-                            for captured_piece in res[1]:
-                                captured_row, captured_col = captured_piece.position
-                                self.board[captured_row][captured_col].change_state(0)
+            (-1, 0),
+            (1, 0),
+            (0, -1),
+            (0, 1),
+        ]:
+            new_row, new_col = row + dir_row, col + dir_col
+            if self.existing_position(new_row, new_col):
+                oposite_piece = self.board[new_row][new_col]
+                if oposite_piece.state == 3 - new_piece.state:
+                    res = self.is_encircled(oposite_piece)
+                    if res[0]:
+                        for captured_piece in res[1]:
+                            captured_row, captured_col = captured_piece.position
+                            self.board[captured_row][captured_col].change_state(0)
