@@ -43,7 +43,7 @@ Assignment Details
     - [How to Play Go in 15 Minutes](https://www.youtube.com/watch?v=JWdgqV-8yVg)
     - [Detailed Rules of Go](https://www.britgo.org/intro/intro2.html)
 - GUI and Painting:
-    - (PyQt5 Painting Tutorials)[https://zetcode.com/gui/pyqt5/painting/]
+    - [PyQt5 Painting Tutorials](https://zetcode.com/gui/pyqt5/painting/)
 
 ### Documentation
 
