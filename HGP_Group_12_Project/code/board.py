@@ -4,7 +4,6 @@ from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
 
-
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
@@ -14,9 +13,10 @@ class Board(QFrame):
     player_turn = 1  # 1 for white, 2 for black
     isStarted = False
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
         self.margin = 40
+        self.scoreBoard = scoreBoard  # Store the scoreBoard reference
         self.initBoard()
         self.ko = None
 
@@ -107,7 +107,7 @@ class Board(QFrame):
             )
 
     def mousePressEvent(self, event):
-        """this event is automatically called when the mouse is pressed"""
+        """This event is automatically called when the mouse is pressed"""
         assert self.logic.board == self.boardArray
 
         if not (self.top_left_x <= event.position().x() <= self.top_left_x + self.square_side and
@@ -145,8 +145,14 @@ class Board(QFrame):
                     print("mousePressEvent() -  Location :" + clickLoc)
                     self.clickLocationSignal.emit(
                         clickLoc
-                    )  # prof put it but i don't like it need moddification
+                    )  # prof put it but i don't like it need modification
                     self.update()  # Redraw the board
+
+                    # Update prisoners and territory
+                    prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
+                    territory_p1, territory_p2 = self.logic.count_territory()
+                    self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
+                    self.scoreBoard.updateTerritory(territory_p1, territory_p2)
 
                     # Alternate the player turn
                     if self.player_turn == 1:
@@ -155,6 +161,9 @@ class Board(QFrame):
                     else:
                         self.player_turn = 1
                         self.player1Time = 60  # reset timer for player 1
+
+                    # Update the turn display
+                    self.scoreBoard.updateTurn(self.player_turn)
 
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
@@ -274,7 +283,6 @@ class Board(QFrame):
             y = captured["y"] - size / 2
 
             painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
-
 
     def resetGame(self):
         self.initBoard()

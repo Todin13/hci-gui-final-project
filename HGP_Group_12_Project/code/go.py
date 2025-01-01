@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
 from PyQt6.QtCore import Qt, QSize
 from board import Board
 from score_board import ScoreBoard
@@ -17,8 +17,8 @@ class Go(QMainWindow):
 
         self.startPage = StartPage()
         self.playerNamesPage = PlayerNamesPage()
-        self.board = Board(self)
         self.scoreBoard = ScoreBoard()
+        self.board = Board(self, self.scoreBoard)  # Pass the scoreBoard to the Board
 
         self.stackedWidget.addWidget(self.startPage)
         self.stackedWidget.addWidget(self.playerNamesPage)
@@ -57,6 +57,7 @@ class Go(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
         self.scoreBoard.passTurnSignal.connect(self.pass_turn)
         self.scoreBoard.resetGameSignal.connect(self.resetGame)
+        self.scoreBoard.endGameSignal.connect(self.endGame)
         print(f"Game started with players: {player1} vs {player2}")
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
@@ -65,6 +66,7 @@ class Go(QMainWindow):
         self.board.player_turn = 3 - self.board.player_turn  # Switch turn
         self.board.print_player_turn()
         self.scoreBoard.updateTurn(self.board.player_turn)
+        self.scoreBoard.reset_pass_count()
 
     def resetGame(self):
         self.board.resetGame()
@@ -73,6 +75,14 @@ class Go(QMainWindow):
         self.scoreBoard.updatePrisoners(0, 0)
         self.scoreBoard.updateTerritory(0, 0)
         self.scoreBoard.updateTurn(self.board.player_turn)
+
+    def endGame(self, winner):
+        if winner == 0:
+            QMessageBox.information(self, "Game Over", "The game ended in a draw.")
+        else:
+            winner_name = "Player 1" if winner == 1 else "Player 2"
+            QMessageBox.information(self, "Game Over", f"{winner_name} wins the game!")
+        self.resetGame()
 
     def resizeEvent(self, event):
         """Adjust the size of the window based on the current page"""
