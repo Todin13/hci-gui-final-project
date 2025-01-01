@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import QFrame
-from PyQt6.QtCore import Qt, pyqtSignal, QPoint, QSize
-from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
-import os
+from PyQt6.QtCore import Qt, pyqtSignal, QSize
+from PyQt6.QtGui import QPainter, QPixmap
 
 # Dummy Piece class for demonstration
 class Piece:
@@ -70,8 +69,6 @@ class Board(QFrame):
         self.drawStars(painter)
         self.drawPieces(painter)
 
-
-
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
         if not self.background_pixmap.isNull():
@@ -97,8 +94,6 @@ class Board(QFrame):
                 piece.state = self.player_turn
                 self.player_turn = 3 - self.player_turn  # Toggle turn
                 self.update()  # Trigger repaint
-
-
 
     def resetGame(self):
         self.initBoard()
@@ -172,9 +167,6 @@ class Board(QFrame):
             y = self.top_left_y + (row - 1) * square_height
             size = min(square_width, square_height) * 0.1  # Star size as a fraction of square size
             painter.drawEllipse(int(x - size / 2), int(y - size / 2), int(size), int(size))
-
-
-
 
     def print_player_turn(self):
         color = "white" if self.player_turn == 1 else "black"
