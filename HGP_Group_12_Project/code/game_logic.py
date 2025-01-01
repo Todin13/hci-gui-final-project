@@ -211,12 +211,16 @@ class GameLogic:
                         for captured_piece in res[1]:
                             captured_row, captured_col = captured_piece.position
                             captured_positions.append((captured_row, captured_col))
-                            self.board[captured_row][captured_col].change_state(0)
-        
+
                             if captured_piece.state == 1:
+                                print("capture un prisonnier blanc")
                                 self.prisoners_p2 += 1
                             elif captured_piece.state == 2:
+                                print("capture un prisonnier noir")
                                 self.prisoners_p1 += 1
+
+                            self.board[captured_row][captured_col].change_state(0)
+
 
         return captured_positions
 
