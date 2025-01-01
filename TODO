@@ -1,13 +1,14 @@
-correct board print :
-    make stars (2:2)(2:7)(7:2)(7:7)
+done correct board print :
+done    make stars (2:2)(2:7)(7:2)(7:7)
+
 game logic
-    circle
-    suicide (verify eye)
-    ko
+done    circle
+done    suicide (verify eye)
+done    ko
     score making
 
-wood in background
-have the pieces in 3D
+done wood in background
+done have the pieces in 3D
 
 detrmine winner
 
@@ -16,3 +17,7 @@ undo redo move
 "how to" / rule
 
 pass turn
+
+have shadow stone where mouse is
+
+add effects when pieces does something
