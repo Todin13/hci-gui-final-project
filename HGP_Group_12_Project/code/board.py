@@ -5,7 +5,6 @@ from piece import Piece
 from game_logic import GameLogic
 import os
 
-
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
@@ -15,9 +14,10 @@ class Board(QFrame):
     player_turn = 1  # 1 for white, 2 for black
     isStarted = False
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
         self.margin = 40
+        self.scoreBoard = scoreBoard  # Store the scoreBoard reference
         self.initBoard()
         self.ko = None
 
@@ -92,7 +92,7 @@ class Board(QFrame):
             )
 
     def mousePressEvent(self, event):
-        """this event is automatically called when the mouse is pressed"""
+        """This event is automatically called when the mouse is pressed"""
         assert self.logic.board == self.boardArray
 
         # Convert the mouse click position to a row and column
@@ -120,8 +120,14 @@ class Board(QFrame):
                     print("mousePressEvent() -  Location :" + clickLoc)
                     self.clickLocationSignal.emit(
                         clickLoc
-                    )  # prof put it but i don't like it need moddification
+                    )  # prof put it but i don't like it need modification
                     self.update()  # Redraw the board
+
+                    # Update prisoners and territory
+                    prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
+                    territory_p1, territory_p2 = self.logic.count_territory()
+                    self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
+                    self.scoreBoard.updateTerritory(territory_p1, territory_p2)
 
                     # Alternate the player turn
                     if self.player_turn == 1:
@@ -130,6 +136,9 @@ class Board(QFrame):
                     else:
                         self.player_turn = 1
                         self.player1Time = 60  # reset timer for player 1
+
+                    # Update the turn display
+                    self.scoreBoard.updateTurn(self.player_turn)
 
     def resetGame(self):
         self.initBoard()

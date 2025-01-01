@@ -2,24 +2,28 @@ from PyQt6.QtWidgets import QDockWidget, QVBoxLayout, QWidget, QLabel, QHBoxLayo
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
 
 class ScoreBoard(QDockWidget):
-    """# base the score_board on a QDockWidget"""
+    """Base the score_board on a QDockWidget"""
     passTurnSignal = pyqtSignal()
     resetGameSignal = pyqtSignal()
+    endGameSignal = pyqtSignal(int)  # Signal to end the game with the winner's player number
 
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.pass_count = 0  # Counter for consecutive passes
+        self.last_player_passed = None  # Track the last player who passed
+        self.board = None  # Attribute to store the Board object
 
     def initUI(self):
-        """initiates ScoreBoard UI"""
+        """Initiates ScoreBoard UI"""
         self.resize(300, 400)
         self.setWindowTitle("ScoreBoard")
 
-        # create a widget to hold other widgets
+        # Create a widget to hold other widgets
         self.mainWidget = QWidget()
         self.mainLayout = QVBoxLayout()
 
-        # create labels and buttons
+        # Create labels and buttons
         self.label_clickLocation = QLabel("Click Location: ")
         self.label_timeRemaining = QLabel("Time remaining: ")
         self.label_player1 = QLabel("Player 1: ")
@@ -59,23 +63,24 @@ class ScoreBoard(QDockWidget):
         self.setWidget(self.mainWidget)
 
     def make_connection(self, board):
-        """this handles a signal sent from the board class"""
-        # when the clickLocationSignal is emitted in board the setClickLocation slot receives it
+        """This handles a signal sent from the board class"""
+        self.board = board  # Store the Board object
+        # When the clickLocationSignal is emitted in board the setClickLocation slot receives it
         board.clickLocationSignal.connect(self.setClickLocation)
-        # when the updateTimerSignal is emitted in the board the setTimeRemaining slot receives it
+        # When the updateTimerSignal is emitted in the board the setTimeRemaining slot receives it
         board.updateTimerSignal.connect(self.setTimeRemaining)
-        self.button_pass.clicked.connect(self.passTurnSignal.emit)
+        self.button_pass.clicked.connect(self.pass_turn)
         self.button_reset.clicked.connect(self.resetGameSignal.emit)
 
-    @pyqtSlot(str)  # checks to make sure that the following slot is receiving an argument of the type 'int'
+    @pyqtSlot(str)  # Checks to make sure that the following slot is receiving an argument of the type 'int'
     def setClickLocation(self, clickLoc):
-        """updates the label to show the click location"""
+        """Updates the label to show the click location"""
         self.label_clickLocation.setText("Click Location: " + clickLoc)
         # print("slot " + clickLoc)
 
     @pyqtSlot(int)
     def setTimeRemaining(self, timeRemaining):
-        """updates the time remaining label to show the time remaining"""
+        """Updates the time remaining label to show the time remaining"""
         update = "Time Remaining: " + str(timeRemaining)
         self.label_timeRemaining.setText(update)
         # print("slot " + str(timeRemaining))
@@ -91,4 +96,25 @@ class ScoreBoard(QDockWidget):
 
     def updateTurn(self, player_turn):
         color = "black" if player_turn == 2 else "white"
-        self.label_turn.setText(f"Turn: Player {player_turn} ({color})")
+        self.label_turn.setText(f"Turn: Player {player_turn} ({color}) to play")
+
+    def pass_turn(self):
+        if self.last_player_passed is None:
+            self.last_player_passed = self.board.player_turn
+            self.pass_count = 1
+        elif self.last_player_passed == self.board.player_turn:
+            self.pass_count += 1
+        else:
+            self.last_player_passed = self.board.player_turn
+            self.pass_count = 1
+
+        if self.pass_count >= 3:
+            self.endGameSignal.emit(3 - self.board.player_turn)  # The other player wins
+        elif self.pass_count == 2:
+            self.endGameSignal.emit(0)  # The game ends in a draw
+
+        self.passTurnSignal.emit()
+
+    def reset_pass_count(self):
+        self.pass_count = 0
+        self.last_player_passed = None
