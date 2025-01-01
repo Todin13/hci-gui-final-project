@@ -3,7 +3,6 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
-import os
 
 
 class Board(QFrame):
@@ -34,6 +33,16 @@ class Board(QFrame):
             print("Failed to load white_stone.png")
         if self.black_stone_pixmap.isNull():
             print("Failed to load black_stone.png")
+
+        self.captured_pieces = []  # List to track captured pieces
+        self.capture_timer = QTimer(self)
+        self.capture_timer.timeout.connect(self.slideOutCapturedPieces)  # Timer for sliding animation
+
+        self.hover_row = -1  # Default no hover
+        self.hover_col = -1  # Default no hover
+        self.transparent_piece_color = 1  # Default hover as white (1 for white, 2 for black)
+        self.setMouseTracking(True)  # Enable mouse tracking
+
 
     def initBoard(self):
         """Initializes the board."""
@@ -79,6 +88,12 @@ class Board(QFrame):
         self.drawStars(painter)
         self.drawPieces(painter)
 
+        # Draw hover pieces
+        self.drawHoverPiece(painter)
+
+        # Draw captured pieces
+        self.drawCapturedPieces(painter)
+
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
         if not self.background_pixmap.isNull():
@@ -95,9 +110,14 @@ class Board(QFrame):
         """this event is automatically called when the mouse is pressed"""
         assert self.logic.board == self.boardArray
 
-        # Convert the mouse click position to a row and column
-        col = int(event.position().x() // self.squareWidth())
-        row = int(event.position().y() // self.squareHeight())
+        if not (self.top_left_x <= event.position().x() <= self.top_left_x + self.square_side and
+                self.top_left_y <= event.position().y() <= self.top_left_y + self.square_side):
+            return  # Ignore clicks outside the square board
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+        col = round((event.position().x() - self.top_left_x) / square_width)
+        row = round((event.position().y() - self.top_left_y) / square_height)
 
         # Ensure the click is within the board boundaries
         if self.logic.existing_position(row, col):
@@ -113,7 +133,12 @@ class Board(QFrame):
                     piece.change_state(self.player_turn)
                     # self.printBoardArray()  # to debug
 
-                    self.logic.capturing_territory(new_piece)
+                    captured_positions = self.logic.capturing_territory(new_piece)
+
+                    if captured_positions:
+                        self.setMouseTracking(False)
+                        self.handleCapturedPieces(captured_positions)
+                        self.setMouseTracking(True)
 
                     # Log the click and update the board
                     clickLoc = f"({row}, {col})"
@@ -130,6 +155,126 @@ class Board(QFrame):
                     else:
                         self.player_turn = 1
                         self.player1Time = 60  # reset timer for player 1
+
+    def mouseMoveEvent(self, event):
+        """Track the mouse position and determine the hovered position."""
+        mouse_x, mouse_y = event.position().x(), event.position().y()
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        col = round((mouse_x - self.top_left_x) / square_width)
+        row = round((mouse_y - self.top_left_y) / square_height)
+
+        # Validate hover position
+        if self.logic.existing_position(row, col):
+            if self.logic.check_piece_placement(Piece(self.player_turn, row, col), hover=True) and self.boardArray[row][col].state == 0:  # Only hover if position is empty and respect game rules
+                self.hover_row = row
+                self.hover_col = col
+            else:
+                self.hover_row = -1
+                self.hover_col = -1
+        else:
+            self.hover_row = -1
+            self.hover_col = -1
+
+        self.update()  # Trigger repaint
+ 
+    def drawHoverPiece(self, painter):
+        """Draw a semi-transparent piece at the hovered position if valid."""
+        if self.hover_row == -1 or self.hover_col == -1:
+            return
+
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        center_x = self.top_left_x + self.hover_col * square_width
+        center_y = self.top_left_y + self.hover_row * square_height
+        size = min(square_width, square_height) * 0.9
+
+        self.transparent_piece_color = self.player_turn
+
+        pixmap = (
+            self.white_stone_pixmap
+            if self.transparent_piece_color == 1
+            else self.black_stone_pixmap
+        )
+
+        x = center_x - size / 2
+        y = center_y - size / 2
+
+        painter.setOpacity(0.5)  # Semi-transparent effect
+        painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+        painter.setOpacity(1.0)  # Reset opacity to normal
+
+    def handleCapturedPieces(self, captured_positions):
+        """
+        Animate captured pieces. First, move them slightly upward.
+        Then, slide them out of the board.
+        
+        :param captured_positions: List of (row, col) tuples representing captured pieces.
+        """
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        # Prepare captured pieces for animation
+        for row, col in captured_positions:
+            piece = self.boardArray[row][col]
+            center_x = self.top_left_x + col * square_width
+            center_y = self.top_left_y + row * square_height
+            self.captured_pieces.append({"piece": piece, "x": center_x, "y": center_y})
+
+        # Trigger the upward animation
+        self.animateCapturedPiecesUpward()
+
+    def animateCapturedPiecesUpward(self):
+        """Animate captured pieces upward slightly."""
+        for captured in self.captured_pieces:
+            captured["y"] -= 10  # Move upward slightly
+
+        self.update()  # Redraw the board to reflect changes
+
+        # After a short delay, slide pieces out of the board
+        self.capture_timer.start(700)  # 1 second delay before sliding out
+
+    def slideOutCapturedPieces(self):
+        """Animate all captured pieces sliding out of the board over 0.5 seconds."""
+        self.animation_step = 0
+        total_steps = 200  # Divide the 0.5 seconds into 100 steps (5ms per step)
+
+        def animateStep():
+            """Perform one step of the sliding animation."""
+            for captured in self.captured_pieces:
+                captured["x"] += self.square_side / total_steps  # Gradual movement
+
+            self.update()  # Redraw to reflect changes
+            self.animation_step += 1
+
+            if self.animation_step >= total_steps:
+                self.capture_timer.stop()
+                self.captured_pieces = []  # Clear captured pieces after animation
+
+        # Set up the timer for the animation
+        self.capture_timer = QTimer(self)
+        self.capture_timer.timeout.connect(animateStep)
+        self.capture_timer.start(5)  # Update every 5ms (100 frames for 0.5 seconds)
+
+
+    def drawCapturedPieces(self, painter):
+        """Draw captured pieces at their current positions."""
+        for captured in self.captured_pieces:
+            pixmap = (
+                self.white_stone_pixmap if self.player_turn == 1 else self.black_stone_pixmap
+            )
+            if pixmap.isNull():
+                continue
+
+            size = min(self.squareWidth(), self.squareHeight()) * 0.9
+            x = captured["x"] - size / 2
+            y = captured["y"] - size / 2
+
+            painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+
 
     def resetGame(self):
         self.initBoard()
