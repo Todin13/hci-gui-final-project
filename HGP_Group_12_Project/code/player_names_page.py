@@ -21,7 +21,7 @@ class PlayerNamesPage(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
 
-        # Ajouter un espace en haut pour centrer verticalement
+        # Add a space at the top to center vertically
         layout.addSpacerItem(
             QSpacerItem(
                 20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
@@ -40,20 +40,20 @@ class PlayerNamesPage(QWidget):
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
 
-        formLayout.addRow("Nom du joueur 1:", self.player1Name)
-        formLayout.addRow("Nom du joueur 2:", self.player2Name)
+        formLayout.addRow("Player name 1:", self.player1Name)
+        formLayout.addRow("Player name 2:", self.player2Name)
 
         layout.addLayout(formLayout)
 
-        # Ajouter un espace entre les champs de saisie et le bouton
+        # Add a space between the write boxes and the button
         layout.addSpacing(20)
 
-        button = QPushButton("Commencer la partie")
+        button = QPushButton("Start the game")
         button.clicked.connect(self.startGame)
         button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         layout.addWidget(button)
 
-        # Ajouter un espace en bas pour centrer verticalement
+        # Add a space at the bottom to center vertically
         layout.addSpacerItem(
             QSpacerItem(
                 20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
@@ -68,4 +68,4 @@ class PlayerNamesPage(QWidget):
         self.startGameSignal.emit(player1, player2)
 
     def sizeHint(self):
-        return QSize(400, 300)  # Définir une taille préférée pour la page
+        return QSize(400, 300)  # Define a prefered size for the window

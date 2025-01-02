@@ -20,36 +20,36 @@ class StartPage(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
 
-        # Ajouter un espace en haut pour centrer verticalement
+        # Add a space at the top to center vertically
         layout.addSpacerItem(
             QSpacerItem(
                 20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
             )
         )
 
-        label = QLabel("Bienvenue au jeu de Go")
+        label = QLabel("Welcome to the Go game !")
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         layout.addWidget(label)
 
-        # Ajouter un espace entre le label et le bouton
+        # Add a space between the label and the button
         layout.addSpacing(20)
 
-        button_new_game = QPushButton("Nouvelle partie")
+        button_new_game = QPushButton("New game")
         button_new_game.clicked.connect(self.newGameSignal.emit)
         button_new_game.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
         layout.addWidget(button_new_game)
 
-        button_rules = QPushButton("Comment jouer")
+        button_rules = QPushButton("How to play")
         button_rules.clicked.connect(self.showRules)
         button_rules.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
         layout.addWidget(button_rules)
 
-        # Ajouter un espace en bas pour centrer verticalement
+        # Add a space at the bottom to center vertically
         layout.addSpacerItem(
             QSpacerItem(
                 20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
@@ -60,14 +60,15 @@ class StartPage(QWidget):
 
     def showRules(self):
         rules = (
-            "Règles du jeu de Go:\n"
-            "1. Le jeu se joue sur un plateau de 9x9.\n"
-            "2. Les joueurs placent à tour de rôle une pierre sur une intersection vide.\n"
-            "3. Le but est de contrôler plus de territoire que l'adversaire.\n"
-            "4. Les pierres sont capturées si elles n'ont plus de libertés.\n"
-            "5. Le jeu se termine quand les deux joueurs passent leur tour.\n"
+            'Rules of Go:\n'
+            '1. Go is a territory control game between "Black" and "White".\n\n'
+            '2. Go is played on a Goban, a squared board, here 9x9.\n\n'
+            '3. Every turn, Black or White places a "Stone" in a free intersection on the board.\n\n'
+            "4. Totally surrounding an opponnent' stone or group of stones will have those captured.\n\n"
+            '5. The winner is decided by however has the most captured stones and free intersections surrounded by their own stones.\n\n'
+            '6. The game is over when both player passes their turn.\n'
         )
-        QMessageBox.information(self, "Règles du jeu de Go", rules)
+        QMessageBox.information(self, "Rules of Go", rules)
 
     def sizeHint(self):
-        return QSize(400, 200)  # Définir une taille préférée pour la page
+        return QSize(400, 200)  # Define a prefered size for the window
