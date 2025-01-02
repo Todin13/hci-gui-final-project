@@ -46,6 +46,7 @@ class ScoreBoard(QDockWidget):
         self.button_pass = QPushButton("Pass")
         self.button_reset = QPushButton("Reset Game")
         self.button_rules = QPushButton("Rules of Ko and Suicide")
+        self.button_controls = QPushButton("Controls")
 
         self.mainWidget.setLayout(self.mainLayout)
         self.mainLayout.addWidget(self.label_clickLocation)
@@ -70,10 +71,12 @@ class ScoreBoard(QDockWidget):
         self.mainLayout.addWidget(self.button_pass)
         self.mainLayout.addWidget(self.button_reset)
         self.mainLayout.addWidget(self.button_rules)
+        self.mainLayout.addWidget(self.button_controls)
 
         self.setWidget(self.mainWidget)
 
         self.button_rules.clicked.connect(self.showKoSuicideRules)
+        self.button_controls.clicked.connect(self.showControls)
 
         # Navigation buttons for pending moves
         self.button_prev = QPushButton("Previous Move")
@@ -141,3 +144,13 @@ class ScoreBoard(QDockWidget):
     def updatePlayerNames(self, player1, player2):
         self.label_player1.setText(f"Player 1: {player1}")
         self.label_player2.setText(f"Player 2: {player2}")
+
+    def showControls(self):
+        controls = (
+            '- Click on a free space to add a temporary Stone.\n\n'
+            '- Click again on the current temporary Stone or press "Enter" to confirm the move.\n\n'
+            '- Press Left arrow or Right arrow to navigate through your temporary Stones\n\n\n'
+            '- Click on "Pass" to pass your turn.\nReminder: 2 passes = end of game\n\n'
+            '- Click on "Reset Game" to clear the board and restart.'
+        )
+        QMessageBox.information(self, "Controls", controls)
