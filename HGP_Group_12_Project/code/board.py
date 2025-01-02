@@ -19,7 +19,8 @@ class Board(QFrame):
         self.margin = 40
         self.scoreBoard = scoreBoard  # Store the scoreBoard reference
         self.initBoard()
-        self.pending_move = None  # Stores the pending move as a dictionary
+        self.pending_moves = []  # List to track all pending moves
+        self.current_pending_index = -1  # Index of the currently viewed pending move
         self.ko = None
 
         # Load assets
@@ -141,25 +142,58 @@ class Board(QFrame):
 
                 if self.logic.check_piece_placement(new_piece):
                     # Set the pending move
-                    self.pending_move = {"row": row, "col": col, "piece": new_piece}
-                    self.update()  # Redraw the board to show the pending move
-                    self.setMouseTracking(False)
+                    if self.pending_moves:
+                        if row == self.pending_moves[self.current_pending_index]["row"] and col == self.pending_moves[self.current_pending_index]["col"]:
+                            self.confirmMove()
+                            return
+                    self.pending_moves.append({"row":row, "col":col, "piece":new_piece})
+                    self.current_pending_index = len(self.pending_moves) - 1
+                    self.update()
+            
+
+    def PreviousPendingMove(self):
+        """Go to the previous pending move."""
+        if not self.pending_moves:
+            return
+
+        if self.current_pending_index > 0:
+            self.current_pending_index -= 1
+        
+        self.update()
+
+    def NextPendingMove(self):
+        """Go to the next pending move."""
+        if not self.pending_moves:
+            return
+
+        if self.current_pending_index < len(self.pending_moves) - 1:
+            self.current_pending_index += 1
+
+        self.update()
 
                     
     def confirmMove(self):
         """Confirm the pending move and finalize the turn."""
-        if not self.pending_move:
+        if self.current_pending_index == -1:
             return  # No pending move to confirm
+        
+        # Apply the currently displayed move to the board
+        move = self.pending_moves[self.current_pending_index]
 
-        row, col = self.pending_move["row"], self.pending_move["col"]
+        row, col = move["row"], move["col"]
         piece = self.boardArray[row][col]
         piece.change_state(self.player_turn)  # Finalize the move
 
         # Handle capturing logic
-        captured_positions = self.logic.capturing_territory(self.pending_move["piece"])
+        captured_positions = self.logic.capturing_territory(move["piece"])
 
         if captured_positions:
             self.handleCapturedPieces(captured_positions)
+
+         # Log the click and update the board
+        clickLoc = f"({row}, {col})"
+        print("mousePressEvent() -  Location :" + clickLoc)
+        self.clickLocationSignal.emit(clickLoc)
 
         # Update scores and alternate turns
         prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
@@ -171,24 +205,18 @@ class Board(QFrame):
         self.scoreBoard.updateTurn(self.player_turn)
 
         # Clear pending move and update board
-        self.pending_move = None
+        self.pending_moves.clear()
+        self.current_pending_index = -1
         self.update()
-        self.setMouseTracking(True)
-
-    def undoMove(self):
-        """Undo the pending move."""
-        self.pending_move = None
-        self.update()  # Redraw the board to remove the pending move
-        self.setMouseTracking(True)
     
     def keyPressEvent(self, event):
         """Handle key presses for confirming or undoing moves."""
         if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return:
             self.confirmMove()  # Confirm move on Enter
-        elif event.key() == Qt.Key.Key_Backspace:
-            self.undoMove()  # Undo move on Backspace
-
-
+        if event.key() == Qt.Key.Key_Left:
+            self.PreviousPendingMove()
+        if event.key() == Qt.Key.Key_Right:
+            self.NextPendingMove()
 
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
@@ -365,8 +393,8 @@ class Board(QFrame):
                 y = center_y - size / 2
                 painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
         # Draw the pending move, if any
-        if self.pending_move:
-            row, col = self.pending_move["row"], self.pending_move["col"]
+        if self.pending_moves:
+            row, col = self.pending_moves[self.current_pending_index]["row"], self.pending_moves[self.current_pending_index]["col"]
             pixmap = (
                 self.white_stone_pixmap
                 if self.player_turn == 1
