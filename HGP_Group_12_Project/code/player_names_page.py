@@ -10,7 +10,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
 
-
 class PlayerNamesPage(QWidget):
     startGameSignal = pyqtSignal(str, str)
 

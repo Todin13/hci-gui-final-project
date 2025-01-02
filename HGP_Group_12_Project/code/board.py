@@ -232,6 +232,7 @@ class Board(QFrame):
 
         self.update_turn()
 
+    
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
         if self.logic.game_state() == 1:
@@ -272,6 +273,34 @@ class Board(QFrame):
 
         center_x = self.top_left_x + self.hover_col * square_width
         center_y = self.top_left_y + self.hover_row * square_height
+        size = min(square_width, square_height) * 0.9
+
+        self.transparent_piece_color = self.player_turn
+
+        pixmap = (
+            self.white_stone_pixmap
+            if self.transparent_piece_color == 1
+            else self.black_stone_pixmap
+        )
+
+        x = center_x - size / 2
+        y = center_y - size / 2
+
+        painter.setOpacity(0.5)  # Semi-transparent effect
+        painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+        painter.setOpacity(1.0)  # Reset opacity to normal
+
+    def drawClickedPiece(self, painter):
+        """Draw the clicked piece at the clicked position."""
+        if self.clicked_position is None:
+            return
+
+        row, col = self.clicked_position
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        center_x = self.top_left_x + col * square_width
+        center_y = self.top_left_y + row * square_height
         size = min(square_width, square_height) * 0.9
 
         self.transparent_piece_color = self.player_turn

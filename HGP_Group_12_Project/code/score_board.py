@@ -5,18 +5,16 @@ from PyQt6.QtWidgets import (
     QLabel,
     QHBoxLayout,
     QPushButton,
+    QMessageBox,
 )
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
-
 
 class ScoreBoard(QDockWidget):
     """Base the score_board on a QDockWidget"""
 
     passTurnSignal = pyqtSignal()
     resetGameSignal = pyqtSignal()
-    endGameSignal = pyqtSignal(
-        int
-    )  # Signal to end the game with the winner's player number
+    endGameSignal = pyqtSignal(int)  # Signal to end the game with the winner's player number
 
     def __init__(self):
         super().__init__()
@@ -47,6 +45,7 @@ class ScoreBoard(QDockWidget):
 
         self.button_pass = QPushButton("Pass")
         self.button_reset = QPushButton("Reset Game")
+        self.button_rules = QPushButton("Rules of Ko and Suicide")
 
         self.mainWidget.setLayout(self.mainLayout)
         self.mainLayout.addWidget(self.label_clickLocation)
@@ -70,8 +69,11 @@ class ScoreBoard(QDockWidget):
         self.mainLayout.addWidget(self.label_turn)
         self.mainLayout.addWidget(self.button_pass)
         self.mainLayout.addWidget(self.button_reset)
+        self.mainLayout.addWidget(self.button_rules)
 
         self.setWidget(self.mainWidget)
+
+        self.button_rules.clicked.connect(self.showKoSuicideRules)
 
         # Navigation buttons for pending moves
         self.button_prev = QPushButton("Previous Move")
@@ -127,3 +129,15 @@ class ScoreBoard(QDockWidget):
 
     def pass_turn(self):
         self.passTurnSignal.emit()
+
+    def showKoSuicideRules(self):
+        rules = (
+            'Rules of Ko and Suicide in Go:\n'
+            '1. Ko Rule: A player cannot play a move that returns the board to the exact same position as it was after the previous move.\n\n'
+            '2. Suicide Rule: A player cannot play a move that results in the immediate capture of their own stone(s) unless it also results in the capture of one or more of the opponent\'s stones.\n'
+        )
+        QMessageBox.information(self, "Rules of Ko and Suicide", rules)
+
+    def updatePlayerNames(self, player1, player2):
+        self.label_player1.setText(f"Player 1: {player1}")
+        self.label_player2.setText(f"Player 2: {player2}")

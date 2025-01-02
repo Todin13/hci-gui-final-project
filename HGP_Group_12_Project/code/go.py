@@ -5,7 +5,6 @@ from score_board import ScoreBoard
 from start_page import StartPage
 from player_names_page import PlayerNamesPage
 
-
 class Go(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -59,6 +58,7 @@ class Go(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
         self.scoreBoard.passTurnSignal.connect(self.pass_turn)
         self.scoreBoard.resetGameSignal.connect(self.resetGame)
+        self.scoreBoard.updatePlayerNames(player1, player2)  # Update player names
         print(f"Game started with players: {player1} vs {player2}")
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
