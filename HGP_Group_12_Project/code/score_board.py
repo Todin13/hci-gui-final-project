@@ -1,11 +1,22 @@
-from PyQt6.QtWidgets import QDockWidget, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QPushButton
+from PyQt6.QtWidgets import (
+    QDockWidget,
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QHBoxLayout,
+    QPushButton,
+)
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
+
 
 class ScoreBoard(QDockWidget):
     """Base the score_board on a QDockWidget"""
+
     passTurnSignal = pyqtSignal()
     resetGameSignal = pyqtSignal()
-    endGameSignal = pyqtSignal(int)  # Signal to end the game with the winner's player number
+    endGameSignal = pyqtSignal(
+        int
+    )  # Signal to end the game with the winner's player number
 
     def __init__(self):
         super().__init__()
@@ -72,7 +83,9 @@ class ScoreBoard(QDockWidget):
         self.button_pass.clicked.connect(self.pass_turn)
         self.button_reset.clicked.connect(self.resetGameSignal.emit)
 
-    @pyqtSlot(str)  # Checks to make sure that the following slot is receiving an argument of the type 'int'
+    @pyqtSlot(
+        str
+    )  # Checks to make sure that the following slot is receiving an argument of the type 'int'
     def setClickLocation(self, clickLoc):
         """Updates the label to show the click location"""
         self.label_clickLocation.setText("Click Location: " + clickLoc)

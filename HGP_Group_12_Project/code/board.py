@@ -4,6 +4,7 @@ from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
 
+
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
@@ -36,13 +37,16 @@ class Board(QFrame):
 
         self.captured_pieces = []  # List to track captured pieces
         self.capture_timer = QTimer(self)
-        self.capture_timer.timeout.connect(self.slideOutCapturedPieces)  # Timer for sliding animation
+        self.capture_timer.timeout.connect(
+            self.slideOutCapturedPieces
+        )  # Timer for sliding animation
 
         self.hover_row = -1  # Default no hover
         self.hover_col = -1  # Default no hover
-        self.transparent_piece_color = 1  # Default hover as white (1 for white, 2 for black)
+        self.transparent_piece_color = (
+            1  # Default hover as white (1 for white, 2 for black)
+        )
         self.setMouseTracking(True)  # Enable mouse tracking
-
 
     def initBoard(self):
         """Initializes the board."""
@@ -110,8 +114,14 @@ class Board(QFrame):
         """This event is automatically called when the mouse is pressed"""
         assert self.logic.board == self.boardArray
 
-        if not (self.top_left_x <= event.position().x() <= self.top_left_x + self.square_side and
-                self.top_left_y <= event.position().y() <= self.top_left_y + self.square_side):
+        if not (
+            self.top_left_x
+            <= event.position().x()
+            <= self.top_left_x + self.square_side
+            and self.top_left_y
+            <= event.position().y()
+            <= self.top_left_y + self.square_side
+        ):
             return  # Ignore clicks outside the square board
 
         square_width = self.square_side / (self.boardWidth - 1)
@@ -177,7 +187,12 @@ class Board(QFrame):
 
         # Validate hover position
         if self.logic.existing_position(row, col):
-            if self.logic.check_piece_placement(Piece(self.player_turn, row, col), hover=True) and self.boardArray[row][col].state == 0:  # Only hover if position is empty and respect game rules
+            if (
+                self.logic.check_piece_placement(
+                    Piece(self.player_turn, row, col), hover=True
+                )
+                and self.boardArray[row][col].state == 0
+            ):  # Only hover if position is empty and respect game rules
                 self.hover_row = row
                 self.hover_col = col
             else:
@@ -188,7 +203,7 @@ class Board(QFrame):
             self.hover_col = -1
 
         self.update()  # Trigger repaint
- 
+
     def drawHoverPiece(self, painter):
         """Draw a semi-transparent piece at the hovered position if valid."""
         if self.hover_row == -1 or self.hover_col == -1:
@@ -220,7 +235,7 @@ class Board(QFrame):
         """
         Animate captured pieces. First, move them slightly upward.
         Then, slide them out of the board.
-        
+
         :param captured_positions: List of (row, col) tuples representing captured pieces.
         """
         square_width = self.square_side / (self.boardWidth - 1)
@@ -268,12 +283,13 @@ class Board(QFrame):
         self.capture_timer.timeout.connect(animateStep)
         self.capture_timer.start(5)  # Update every 5ms (100 frames for 0.5 seconds)
 
-
     def drawCapturedPieces(self, painter):
         """Draw captured pieces at their current positions."""
         for captured in self.captured_pieces:
             pixmap = (
-                self.white_stone_pixmap if self.player_turn == 1 else self.black_stone_pixmap
+                self.white_stone_pixmap
+                if self.player_turn == 1
+                else self.black_stone_pixmap
             )
             if pixmap.isNull():
                 continue

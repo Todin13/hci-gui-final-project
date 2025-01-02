@@ -1,6 +1,7 @@
 from piece import Piece
 from copy import deepcopy
 
+
 class GameLogic:
     print("Game Logic Object Created")
     # TODO add code here to manage the logic of your game
@@ -220,7 +221,6 @@ class GameLogic:
                                 self.prisoners_p1 += 1
 
                             self.board[captured_row][captured_col].change_state(0)
-
 
         return captured_positions
 

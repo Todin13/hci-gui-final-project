@@ -5,9 +5,10 @@ from PyQt6.QtWidgets import (
     QLabel,
     QSpacerItem,
     QSizePolicy,
-    QMessageBox
+    QMessageBox,
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
+
 
 class StartPage(QWidget):
     newGameSignal = pyqtSignal()
@@ -36,12 +37,16 @@ class StartPage(QWidget):
 
         button_new_game = QPushButton("Nouvelle partie")
         button_new_game.clicked.connect(self.newGameSignal.emit)
-        button_new_game.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        button_new_game.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         layout.addWidget(button_new_game)
 
         button_rules = QPushButton("Comment jouer")
         button_rules.clicked.connect(self.showRules)
-        button_rules.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        button_rules.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         layout.addWidget(button_rules)
 
         # Ajouter un espace en bas pour centrer verticalement
