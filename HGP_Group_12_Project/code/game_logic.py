@@ -6,13 +6,21 @@ class GameLogic:
     print("Game Logic Object Created")
     # TODO add code here to manage the logic of your game
 
-    def __init__(self, board: list[list[Piece]]):
+    def __init__(self, board: list[list[Piece]], komi=6.5):
+        """
+        Init of game logic, komi is the point compensation given to white player as it's black who start here 6.5 as we follow japanese rules
+        """
         self.board = board  # saving the pointing to the board
         self.score = 0  # init the score
         self.top = len(board)  # getting the max index + 1
         self.ko_state = False  # ko state round before, init as false
         self.prisoners_p1 = 0  # Counter for Player 1's prisoners
         self.prisoners_p2 = 0  # Counter for Player 2's prisoners
+        self.territory_p1 = 0  # Territory count for player 1
+        self.territory_p2 = 0  # Territory cunt for player 2
+        self.komi = komi
+        self.score_p1 = komi
+        self.score_p2 = 0
 
     def check_piece_placement(self, new_piece: Piece, hover=False):
         """
@@ -247,6 +255,9 @@ class GameLogic:
                     elif owner == 2:
                         territory_p2 += territory
 
+        self.territory_p1 = territory_p1
+        self.territory_p2 = territory_p2
+
         return territory_p1, territory_p2
 
     def flood_fill_territory(self, row, col, visited):
@@ -272,3 +283,30 @@ class GameLogic:
                         owner = 0  # Mixed territory
 
         return territory, owner
+
+    def territory_scoring(self):
+        """
+        Counting point based on the Japanese go's rules (territory scoring)
+        """
+        
+        self.score_p1 = self.territory_p1 - self.prisoners_p2 + self.komi
+        self.score_p2 = self.territory_p2 - self.prisoners_p1
+
+        return self.score_p1, self.score_p2
+
+    def area_scoring(self):
+        """
+        Scocring based on the Chinese rules (area scoring)
+        """
+
+        self.score_p1 = self.territory_p1 + self.komi
+        self.score_p2 = self.territory_p2
+
+        for row in self.board:
+            for piece in row:
+                if piece.state == 1:
+                    self.score_p1 += 1
+                elif piece.state == 2:
+                    self.score_p2 +=1
+
+        return self.score_p1, self.score_p2

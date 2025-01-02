@@ -345,12 +345,10 @@ class Board(QFrame):
 
     def resetGame(self):
         self.initBoard()
-        self.player_turn = 1
-        self.isStarted = False
+        self.player_turn = 2 # black start
         self.update()
 
     def start(self):
-        self.isStarted = True
         self.resetGame()
         print("Game started")
 
