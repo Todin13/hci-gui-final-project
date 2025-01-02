@@ -1,31 +1,34 @@
 done correct board print :
 done    make stars (2:2)(2:7)(7:2)(7:7)
-
 game logic
 done    circle
 done    suicide (verify eye)
 done    ko
-    score making (handicaps)
-
 done wood in background
 done have the pieces in 3D
+done pass turn
+done have shadow stone where mouse is
+done add effects when pieces does something
+
+
+end of game :
+    glow dead stones
+    continue to debate about dead stones
+    give up button
 
 detrmine winner (japanese rules)
 
-undo redo move 
+score making (handicaps)
 
-"how to" / rule
+undo redo move button and list
 
-done pass turn
+"how to" / rule ko suicide
 
 end game when 2 passes
-
-done have shadow stone where mouse is
-
-done add effects when pieces does something
 
 scoreboard gui
 
 speed go 
+
 
 winner animation
