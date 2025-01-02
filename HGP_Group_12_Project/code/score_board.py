@@ -141,6 +141,7 @@ class ScoreBoard(QDockWidget):
     def pass_turn(self):
         self.passTurnSignal.emit()
 
+
     def showKoSuicideRules(self):
         rules = (
             '1. Ko Rule:\nThe Ko rule prohibits a player from making a move that would return the game to a position identical to one that occurred earlier in the game. This prevents infinite captures and recaptures of the same stone. For example, if a player captures an opponent\'s stone, the opponent cannot immediately recapture that stone; they must play elsewhere before they can come back to capture the stone. This rule is crucial to avoid infinite repetition situations, known as "ko fights".\n\n'
