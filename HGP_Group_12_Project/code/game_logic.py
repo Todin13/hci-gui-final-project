@@ -204,7 +204,7 @@ class GameLogic:
         ]:
             new_row, new_col = row + dir_row, col + dir_col
             if self.existing_position(new_row, new_col):
-                oposite_piece = self.board[new_row][new_col]
+                oposite_piece = deepcopy(self.board[new_row][new_col])
                 if oposite_piece.state == 3 - new_piece.state:
                     res = self.is_encircled(oposite_piece)
                     if res[0]:
@@ -234,9 +234,12 @@ class GameLogic:
         territory_p2 = 0
         visited = set()
 
+        if sum([sum([p.state for p in row]) for row in self.board]) < 3:
+            return 0, 0
+
         for row in range(self.top):
             for col in range(self.top):
-                piece = self.board[row][col]
+                piece = deepcopy(self.board[row][col])
                 if piece.state == 0 and (row, col) not in visited:
                     territory, owner = self.flood_fill_territory(row, col, visited)
                     if owner == 1:
