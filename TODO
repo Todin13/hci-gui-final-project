@@ -9,7 +9,8 @@ done have the pieces in 3D
 done pass turn
 done have shadow stone where mouse is
 done add effects when pieces does something
-
+done undo redo move button and list
+done "how to" / rule ko suicide
 
 end of game :
     glow dead stones
@@ -20,15 +21,10 @@ detrmine winner (japanese rules)
 
 score making (handicaps)
 
-undo redo move button and list
-
-"how to" / rule ko suicide
-
 end game when 2 passes
 
 scoreboard gui
 
 speed go 
-
 
 winner animation
