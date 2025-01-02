@@ -139,7 +139,6 @@ class ScoreBoard(QDockWidget):
         self.label_turn.setText(f"Turn: Player {player_turn} ({color}) to play")
 
     def pass_turn(self):
-        self.pass_count += 1
         self.passTurnSignal.emit()
 
     def showKoSuicideRules(self):

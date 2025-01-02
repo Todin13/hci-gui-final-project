@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QFrame, QDialog, QMessageBox
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
-from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
+from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap, QKeyEvent
 from piece import Piece
 from game_logic import GameLogic
 from copy import deepcopy
@@ -50,6 +50,9 @@ class Board(QFrame):
             1  # Default hover as white (1 for white, 2 for black)
         )
         self.setMouseTracking(True)  # Enable mouse tracking
+
+        self.pending_move = None  # Store the pending move
+        self.clicked_position = None  # Store the clicked position
 
         self.handicap = {"player": 0, "type": None, "value": None, "komi": "6.5"}
 
