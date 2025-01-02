@@ -19,6 +19,7 @@ class Board(QFrame):
         self.margin = 40
         self.scoreBoard = scoreBoard  # Store the scoreBoard reference
         self.initBoard()
+        self.pending_move = None  # Stores the pending move as a dictionary
         self.ko = None
 
         # Load assets
@@ -139,41 +140,55 @@ class Board(QFrame):
                 new_piece = Piece(self.player_turn, row, col)
 
                 if self.logic.check_piece_placement(new_piece):
-                    # Set the piece state based on the player turn
-                    piece.change_state(self.player_turn)
-                    # self.printBoardArray()  # to debug
+                    # Set the pending move
+                    self.pending_move = {"row": row, "col": col, "piece": new_piece}
+                    self.update()  # Redraw the board to show the pending move
+                    self.setMouseTracking(False)
 
-                    captured_positions = self.logic.capturing_territory(new_piece)
+                    
+    def confirmMove(self):
+        """Confirm the pending move and finalize the turn."""
+        if not self.pending_move:
+            return  # No pending move to confirm
 
-                    if captured_positions:
-                        self.setMouseTracking(False)
-                        self.handleCapturedPieces(captured_positions)
-                        self.setMouseTracking(True)
+        row, col = self.pending_move["row"], self.pending_move["col"]
+        piece = self.boardArray[row][col]
+        piece.change_state(self.player_turn)  # Finalize the move
 
-                    # Log the click and update the board
-                    clickLoc = f"({row}, {col})"
-                    print("mousePressEvent() -  Location :" + clickLoc)
-                    self.clickLocationSignal.emit(
-                        clickLoc
-                    )  # prof put it but i don't like it need modification
-                    self.update()  # Redraw the board
+        # Handle capturing logic
+        captured_positions = self.logic.capturing_territory(self.pending_move["piece"])
 
-                    # Update prisoners and territory
-                    prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
-                    territory_p1, territory_p2 = self.logic.count_territory()
-                    self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
-                    self.scoreBoard.updateTerritory(territory_p1, territory_p2)
+        if captured_positions:
+            self.handleCapturedPieces(captured_positions)
 
-                    # Alternate the player turn
-                    if self.player_turn == 1:
-                        self.player_turn = 2
-                        self.player2Time = 60  # reset timer for player 2
-                    else:
-                        self.player_turn = 1
-                        self.player1Time = 60  # reset timer for player 1
+        # Update scores and alternate turns
+        prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
+        territory_p1, territory_p2 = self.logic.count_territory()
+        self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
+        self.scoreBoard.updateTerritory(territory_p1, territory_p2)
 
-                    # Update the turn display
-                    self.scoreBoard.updateTurn(self.player_turn)
+        self.player_turn = 3 - self.player_turn  # Toggle turn
+        self.scoreBoard.updateTurn(self.player_turn)
+
+        # Clear pending move and update board
+        self.pending_move = None
+        self.update()
+        self.setMouseTracking(True)
+
+    def undoMove(self):
+        """Undo the pending move."""
+        self.pending_move = None
+        self.update()  # Redraw the board to remove the pending move
+        self.setMouseTracking(True)
+    
+    def keyPressEvent(self, event):
+        """Handle key presses for confirming or undoing moves."""
+        if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return:
+            self.confirmMove()  # Confirm move on Enter
+        elif event.key() == Qt.Key.Key_Backspace:
+            self.undoMove()  # Undo move on Backspace
+
+
 
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
@@ -349,6 +364,23 @@ class Board(QFrame):
                 x = center_x - size / 2
                 y = center_y - size / 2
                 painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+        # Draw the pending move, if any
+        if self.pending_move:
+            row, col = self.pending_move["row"], self.pending_move["col"]
+            pixmap = (
+                self.white_stone_pixmap
+                if self.player_turn == 1
+                else self.black_stone_pixmap
+            )
+            center_x = self.top_left_x + col * square_width
+            center_y = self.top_left_y + row * square_height
+            size = min(square_width, square_height) * 0.9
+            x = center_x - size / 2
+            y = center_y - size / 2
+
+            painter.setOpacity(0.8)  # Semi-transparent effect
+            painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+            painter.setOpacity(1.0)  # Reset opacity
 
     def drawStars(self, painter):
         """Draw black dots (stars) at specific intersections on the board."""
