@@ -548,6 +548,7 @@ class Board(QFrame):
 
         if self.conssecutive_passing_turn >= 2:
             if self.logic.game_state() == 1:
+                QMessageBox.information(self, "Dispute not abouting situation", "Dispute not abouting situation")
                 self.conssecutive_passing_turn = 0
                 self.logic.end_game()
             elif self.logic.game_state() == 2:
@@ -685,6 +686,16 @@ class Board(QFrame):
                 "value": None,
                 "komi": "6.5",
             }
+    def return_to_menu(self):
+        self.parent().stackedWidget.setCurrentWidget(self.parent().startPage)
+        self.parent().adjustSize()
+        self.parent().center()
+
+    def start_new_game(self):
+        self.parent().stackedWidget.setCurrentWidget(self.board)
+        self.start()
+        self.parent().adjustSize()
+        self.parent().center()
 
     def triggerFireworksAnimation(self):
         firework_particles = []
@@ -722,3 +733,18 @@ class Board(QFrame):
         self.fireworks_timer = QTimer(self)
         self.fireworks_timer.timeout.connect(animateFireworks)
         self.fireworks_timer.start(10) 
+
+    def resignGame(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            return
+        opponent = 3 - self.player_turn
+        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
+        QMessageBox.information(self, "Game Over", msg)
+        self.logic.stop()
+        self.start()
+
+    def disputeNotSuccessing(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
+            self.logic.stop()
+            self.start()
