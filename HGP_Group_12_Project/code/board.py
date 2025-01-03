@@ -102,7 +102,6 @@ class Board(QFrame):
         if hasattr(self, "highlight_positions") and self.highlight_positions:
             self.highlightPieces(painter, self.highlight_positions)
 
-
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
         if not self.background_pixmap.isNull():
@@ -137,7 +136,7 @@ class Board(QFrame):
         if self.logic.existing_position(row, col):
 
             piece = self.boardArray[row][col]
-           
+
             if self.logic.game_state() == 1 and piece.state == 0:
 
                 new_piece = Piece(self.player_turn, row, col)
@@ -145,20 +144,30 @@ class Board(QFrame):
                 if self.logic.check_piece_placement(new_piece):
                     # Set the pending move
                     if self.pending_moves:
-                        if row == self.pending_moves[self.current_pending_index]["row"] and col == self.pending_moves[self.current_pending_index]["col"]:
+                        if (
+                            row == self.pending_moves[self.current_pending_index]["row"]
+                            and col
+                            == self.pending_moves[self.current_pending_index]["col"]
+                        ):
                             self.confirmMove()
                             return
-                    self.pending_moves.append({"row":row, "col":col, "piece":new_piece})
+                    self.pending_moves.append(
+                        {"row": row, "col": col, "piece": new_piece}
+                    )
                     self.current_pending_index = len(self.pending_moves) - 1
                     self.update()
             elif self.logic.game_state() == 2 and piece.state == 3 - self.player_turn:
 
-                neighbor_pieces_positions = self.logic.select_neighboor_piece(deepcopy(piece))
+                neighbor_pieces_positions = self.logic.select_neighboor_piece(
+                    deepcopy(piece)
+                )
 
                 # TODO implement glowing piece like surround them in blue ?
                 self.triggerHighlight(neighbor_pieces_positions)
 
-                captured_positions = self.logic.remove_dead_pieces_box(self.player_turn, neighbor_pieces_positions)
+                captured_positions = self.logic.remove_dead_pieces_box(
+                    self.player_turn, neighbor_pieces_positions
+                )
 
                 if captured_positions:
                     self.setMouseTracking(False)
@@ -166,10 +175,9 @@ class Board(QFrame):
                     self.setMouseTracking(True)
 
                     self.update_turn()
-                
+
                 else:
                     self.logic.dead_pieces_debate()
-            
 
     def PreviousPendingMove(self):
         """Go to the previous pending move."""
@@ -178,7 +186,7 @@ class Board(QFrame):
 
         if self.current_pending_index > 0:
             self.current_pending_index -= 1
-        
+
         self.update()
 
     def NextPendingMove(self):
@@ -191,12 +199,11 @@ class Board(QFrame):
 
         self.update()
 
-                    
     def confirmMove(self):
         """Confirm the pending move and finalize the turn."""
         if self.current_pending_index == -1:
             return  # No pending move to confirm
-        
+
         # Apply the currently displayed move to the board
         move = self.pending_moves[self.current_pending_index]
 
@@ -210,13 +217,13 @@ class Board(QFrame):
         if captured_positions:
             self.handleCapturedPieces(captured_positions)
 
-         # Log the click and update the board
+        # Log the click and update the board
         clickLoc = f"({row}, {col})"
         print("mousePressEvent() -  Location :" + clickLoc)
         self.clickLocationSignal.emit(clickLoc)
 
         self.update_turn()
-    
+
     def keyPressEvent(self, event):
         """Handle key presses for confirming or undoing moves."""
         if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return:
@@ -354,7 +361,7 @@ class Board(QFrame):
 
     def resetGame(self):
         self.initBoard()
-        self.player_turn = 2 # black start
+        self.player_turn = 2  # black start
         self.conssecutive_passing_turn = 0
         self.update()
 
@@ -403,7 +410,10 @@ class Board(QFrame):
                 painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
         # Draw the pending move, if any
         if self.pending_moves:
-            row, col = self.pending_moves[self.current_pending_index]["row"], self.pending_moves[self.current_pending_index]["col"]
+            row, col = (
+                self.pending_moves[self.current_pending_index]["row"],
+                self.pending_moves[self.current_pending_index]["col"],
+            )
             pixmap = (
                 self.white_stone_pixmap
                 if self.player_turn == 1
@@ -422,7 +432,7 @@ class Board(QFrame):
     def triggerHighlight(self, positions):
         """Trigger a new paint event specifically for highlighting."""
         self.highlight_positions = positions
-        self.repaint() 
+        self.repaint()
         self.highlight_positions = None
 
     def highlightPieces(self, painter, positions):
@@ -478,8 +488,8 @@ class Board(QFrame):
 
         if pass_turn:
             self.conssecutive_passing_turn += 1
-        else :
-            self.conssecutive_passing_turn = 0 # reset if not passing turn
+        else:
+            self.conssecutive_passing_turn = 0  # reset if not passing turn
 
         if self.conssecutive_passing_turn >= 2:
             if self.logic.game_state() == 1:
@@ -491,8 +501,8 @@ class Board(QFrame):
 
         # Alternate the player turn
         self.player_turn = 3 - self.player_turn
-    
-        # Update the turn display    
+
+        # Update the turn display
         self.scoreBoard.updateTurn(self.player_turn)
 
         # Update prisoners and territory

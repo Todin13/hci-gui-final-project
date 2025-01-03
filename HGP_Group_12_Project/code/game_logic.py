@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QMessageBox
 
 
 class GameLogic:
-    
+
     def __init__(self, board: list[list[Piece]], komi=6.5):
         """
         Init of game logic, komi is the point compensation given to white player as it's black who start here 6.5 as we follow japanese rules
@@ -17,9 +17,9 @@ class GameLogic:
         self.__territory_p1 = 0  # Territory count for player 1
         self.__territory_p2 = 0  # Territory cunt for player 2
         self.__komi = komi
-        self.__score_p1 = 0 
+        self.__score_p1 = 0
         self.__score_p2 = 0
-        self.__game_state = 0 # not playing
+        self.__game_state = 0  # not playing
         self.__final_board = None
 
     def start(self):
@@ -296,8 +296,8 @@ class GameLogic:
         Counting point based on the Japanese go's rules (territory scoring)
         """
 
-        self.__score_p1 = self.__territory_p1 - self.__prisoners_p1 + self.__komi
-        self.__score_p2 = self.__territory_p2 - self.__prisoners_p2
+        self.__score_p1 = self.__territory_p1 - self.__prisoners_p2 + self.__komi
+        self.__score_p2 = self.__territory_p2 - self.__prisoners_p1
 
         return self.__score_p1, self.__score_p2
 
@@ -314,14 +314,13 @@ class GameLogic:
                 if piece.state == 1:
                     self.__score_p1 += 1
                 elif piece.state == 2:
-                    self.__score_p2 +=1
+                    self.__score_p2 += 1
 
         return self.__score_p1, self.__score_p2
 
-
     def end_game(self):
         """
-        Implementation of the end game before territory scoring 
+        Implementation of the end game before territory scoring
         """
         self.__game_state = 2
 
@@ -332,21 +331,24 @@ class GameLogic:
                     actual_piece = self.board[row][col]
                     if actual_piece.state != final_state:
                         actual_piece.change_state(final_state)
-        
 
-    def remove_dead_pieces_box(self, player_turn, selected_pieces: list[tuple[int, int]]):
+    def remove_dead_pieces_box(
+        self, player_turn, selected_pieces: list[tuple[int, int]]
+    ):
         """
         Function to remove dead pieces
         """
 
         selected_piece = Piece(3 - player_turn)
 
-        msg_txt = f"{selected_piece.name} player, do you concede that the selected pieces are dead?" # maybe permit the name of the player if ther is one
+        msg_txt = f"{selected_piece.name} player, do you concede that the selected pieces are dead?"  # maybe permit the name of the player if ther is one
 
         message_box = QMessageBox()
         message_box.setWindowTitle("Concede Pieces")
         message_box.setText(msg_txt)
-        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
         response = message_box.exec()
 
         if response == QMessageBox.StandardButton.Yes:
@@ -364,7 +366,6 @@ class GameLogic:
         elif response == QMessageBox.StandardButton.No:
             return
 
-
     def select_neighboor_piece(self, piece: Piece, visited_positions=None, visit=None):
         """
         Return a list of all the neighboor piece of the same state
@@ -381,16 +382,19 @@ class GameLogic:
         row, col = piece.position
 
         for dir_row, dir_col in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                new_row, new_col = row + dir_row, col + dir_col
-                if self.existing_position(new_row, new_col):
-                    neighbor_piece = deepcopy(self.board[new_row][new_col])
-                    if neighbor_piece.state == piece.state and neighbor_piece.position not in visited_positions: 
-                        visit.add(neighbor_piece)
-        
+            new_row, new_col = row + dir_row, col + dir_col
+            if self.existing_position(new_row, new_col):
+                neighbor_piece = deepcopy(self.board[new_row][new_col])
+                if (
+                    neighbor_piece.state == piece.state
+                    and neighbor_piece.position not in visited_positions
+                ):
+                    visit.add(neighbor_piece)
+
         if len(visit) > 0:
             neighbor_piece = visit.pop()
             return self.select_neighboor_piece(neighbor_piece, visited_positions, visit)
-        
+
         return [pos for pos in visited_positions]
 
     def dead_pieces_debate(self):

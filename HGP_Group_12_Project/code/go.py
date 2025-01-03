@@ -57,14 +57,13 @@ class Go(QMainWindow):
         self.scoreBoard.make_connection(self.board)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
         self.scoreBoard.passTurnSignal.connect(self.pass_turn)
-        self.scoreBoard.resetGameSignal.connect(self.resetGame) 
+        self.scoreBoard.resetGameSignal.connect(self.resetGame)
         print(f"Game started with players: {player1} vs {player2}")
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
 
     def pass_turn(self):
         self.board.update_turn(True)
-        
 
     def resetGame(self):
         self.board.start()
