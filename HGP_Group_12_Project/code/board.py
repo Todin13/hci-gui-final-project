@@ -18,7 +18,7 @@ import random
 
 
 class Board(QFrame):
-    updateTimerSignal = pyqtSignal(int)
+    updateTimerSignal = pyqtSignal(int, int)
     clickLocationSignal = pyqtSignal(str)
     resetGameSignal = pyqtSignal()  # Signal pour la réinitialisation du jeu
     returnToMenuSignal = pyqtSignal()  # Nouveau signal pour retourner au menu
@@ -790,8 +790,7 @@ class Board(QFrame):
                     return
 
                 self.player_1_remaining_time -= 1
-                print("timerEvent() for palyer 1", self.player_1_remaining_time)
-                self.updateTimerSignal.emit(self.player_1_remaining_time)
+                print("timerEvent() for White player", self.player_1_remaining_time)
 
             if self.player_turn == 2:
                 if self.player_2_remaining_time == 0:
@@ -807,5 +806,7 @@ class Board(QFrame):
                     return
 
                 self.player_2_remaining_time -= 1
-                print("timerEvent() for palyer 1", self.player_2_remaining_time)
-                self.updateTimerSignal.emit(self.player_2_remaining_time)
+                print("timerEvent() for Black player", self.player_2_remaining_time)
+
+            # Emit the signal with the remaining time for both players
+            self.updateTimerSignal.emit(self.player_1_remaining_time, self.player_2_remaining_time)

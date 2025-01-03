@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
 
+
 class ScoreBoard(QDockWidget):
     """Base the score_board on a QDockWidget"""
 
@@ -26,6 +27,9 @@ class ScoreBoard(QDockWidget):
         self.pass_count = 0  # Counter for consecutive passes
         self.last_player_passed = None  # Track the last player who passed
         self.board = None  # Attribute to store the Board object
+        self.gamemode = 0  # 0 for normal game, 1 for blitz game
+        self.time_remaining_p1 = 0
+        self.time_remaining_p2 = 0
 
     def initUI(self):
         """Initiates ScoreBoard UI"""
@@ -38,7 +42,8 @@ class ScoreBoard(QDockWidget):
 
         # Create labels and buttons
         self.label_clickLocation = QLabel("Click Location: ")
-        self.label_timeRemaining = QLabel("Time remaining: ")
+        self.label_timeRemaining_p1 = QLabel("Time Remaining White Player: ")
+        self.label_timeRemaining_p2 = QLabel("Time Remaining Black Player: ")
         self.label_player1 = QLabel("White Player: ")
         self.label_player2 = QLabel("Black Player: ")
         self.label_prisoners_p1 = QLabel("White's Prisoners: 0")
@@ -70,7 +75,8 @@ class ScoreBoard(QDockWidget):
         self.mainWidget.setLayout(self.mainLayout)
         self.mainLayout.addWidget(self.topBar)  # Add the top bar
         self.mainLayout.addWidget(self.label_clickLocation)
-        self.mainLayout.addWidget(self.label_timeRemaining)
+        self.mainLayout.addWidget(self.label_timeRemaining_p1)
+        self.mainLayout.addWidget(self.label_timeRemaining_p2)
 
         playerLayout = QHBoxLayout()
         playerLayout.addWidget(self.label_player1)
@@ -105,6 +111,10 @@ class ScoreBoard(QDockWidget):
         self.button_rules.clicked.connect(self.showKoSuicideRules)
         self.button_controls.clicked.connect(self.showControls)
 
+        # Hide time remaining labels initially
+        self.label_timeRemaining_p1.setVisible(False)
+        self.label_timeRemaining_p2.setVisible(False)
+
     def make_connection(self, board):
         """This handles a signal sent from the board class"""
         self.board = board  # Store the Board object
@@ -131,11 +141,25 @@ class ScoreBoard(QDockWidget):
         self.label_clickLocation.setText("Click Location: " + clickLoc)
         # print("slot " + clickLoc)
 
-    @pyqtSlot(int)
-    def setTimeRemaining(self, timeRemaining):
+    @pyqtSlot(int, int)
+    def setTimeRemaining(self, timeRemaining_p1, timeRemaining_p2):
         """Updates the time remaining label to show the time remaining"""
-        update = "Time Remaining: " + str(timeRemaining)
-        self.label_timeRemaining.setText(update)
+        self.time_remaining_p1 = timeRemaining_p1
+        self.time_remaining_p2 = timeRemaining_p2
+        if self.gamemode == 1:  # Blitz game
+            minutes_p1 = timeRemaining_p1 // 60
+            seconds_p1 = timeRemaining_p1 % 60
+            minutes_p2 = timeRemaining_p2 // 60
+            seconds_p2 = timeRemaining_p2 % 60
+            update_p1 = f"Time Remaining White player: {minutes_p1:02}:{seconds_p1:02}"
+            update_p2 = f"Time Remaining Black player: {minutes_p2:02}:{seconds_p2:02}"
+            self.label_timeRemaining_p1.setText(update_p1)
+            self.label_timeRemaining_p2.setText(update_p2)
+            self.label_timeRemaining_p1.setVisible(True)
+            self.label_timeRemaining_p2.setVisible(True)
+        else:
+            self.label_timeRemaining_p1.setVisible(False)
+            self.label_timeRemaining_p2.setVisible(False)
         # print("slot " + str(timeRemaining))
         # self.redraw()
 
