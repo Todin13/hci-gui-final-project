@@ -190,7 +190,6 @@ class Board(QFrame):
                 else:
                     self.logic.dead_pieces_debate()
 
-
     def PreviousPendingMove(self):
         """Go to the previous pending move."""
         if not self.pending_moves:
@@ -545,7 +544,6 @@ class Board(QFrame):
 
         if self.conssecutive_passing_turn >= 2:
             if self.logic.game_state() == 1:
-                QMessageBox.information(self, "Dispute not abouting situation", "Dispute not abouting situation")
                 self.conssecutive_passing_turn = 0
                 self.logic.end_game()
             elif self.logic.game_state() == 2:
