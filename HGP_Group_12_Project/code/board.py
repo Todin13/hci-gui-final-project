@@ -875,7 +875,15 @@ class Board(QFrame):
             
             if self.player_turn == 1:
                 if self.player_1_remaining_time == 0:
-                    print("Game over")
+                    print("Game over for player 1")
+                    self.logic.stop()
+                    msg = "Black player win by timeout"
+                    message_box = QMessageBox()
+                    message_box.setWindowTitle("Winner")
+                    message_box.setText(msg)
+
+                    message_box.exec()
+                    return
 
                 self.player_1_remaining_time -= 1
                 print('timerEvent() for palyer 1', self.player_1_remaining_time)
@@ -883,7 +891,15 @@ class Board(QFrame):
             
             if self.player_turn == 2:
                 if self.player_2_remaining_time == 0:
-                    print("Game over")
+                    print("Game over for player 2")
+                    self.logic.stop()
+                    msg = "White player win by timeout"
+                    message_box = QMessageBox()
+                    message_box.setWindowTitle("Winner")
+                    message_box.setText(msg)
+
+                    message_box.exec()
+                    return
 
                 self.player_2_remaining_time -= 1
                 print('timerEvent() for palyer 1', self.player_2_remaining_time)
