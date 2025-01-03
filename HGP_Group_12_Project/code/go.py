@@ -72,6 +72,7 @@ class Go(QMainWindow):
         self.stackedWidget.setCurrentWidget(self.startPage)
         self.adjustSize()
         self.center()
+        self.initUI()
 
     def showPlayerNamesPage(self, gamemode):
         self.stackedWidget.setCurrentWidget(self.playerNamesPage)
