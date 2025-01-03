@@ -660,7 +660,6 @@ class Board(QFrame):
         msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
         QMessageBox.information(self, "Game Over", msg)
         self.logic.stop()
-        self.start()
 
     def disputeNotSuccessing(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
