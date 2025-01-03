@@ -18,6 +18,37 @@ class StartPage(QWidget):
         self.initUI()
 
     def initUI(self):
+
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color:  #77b1f2;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                color: #333333;
+            }
+            QLabel {
+                font-size: 20px;
+                font-weight: bold;
+                color: #222222;
+            }
+            QPushButton {
+                background-color: #784212;
+                color: white;
+                font-size: 16px;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3e8e41;
+            }
+            """
+        )
+
         layout = QVBoxLayout()
 
         # Add a space at the top to center vertically
