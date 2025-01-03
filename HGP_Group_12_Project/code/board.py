@@ -17,6 +17,8 @@ class Board(QFrame):
     boardWidth = 9  # 9x9 Goban
     boardHeight = 9
 
+    gamemode = 0
+
     def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
         self.margin = 50
@@ -56,6 +58,10 @@ class Board(QFrame):
         self.clicked_position = None  # Store the clicked position
 
         self.handicap = {"player": 0, "type": None, "value": None, "komi": "6.5"}
+
+        if self.gamemode == 1:
+            self.player_1_remaining_time = 120
+            self.player_2_remaining_time = 120
 
     def initBoard(self):
         """Initializes the board."""
@@ -149,11 +155,11 @@ class Board(QFrame):
 
             piece = self.boardArray[row][col]
 
-            if self.logic.game_state() == 1 and piece.state == 0:
+            if self.logic.game_state() == 1 and piece.state == 0 :
 
                 new_piece = Piece(self.player_turn, row, col)
 
-                if self.logic.check_piece_placement(new_piece):
+                if self.logic.check_piece_placement(new_piece) and self.gamemode == 0:
                     # Set the pending move
                     if self.pending_moves:
                         if (
@@ -170,7 +176,31 @@ class Board(QFrame):
                     self.current_pending_index = len(self.pending_moves) - 1
                     self.update()
 
+                elif self.logic.check_piece_placement(new_piece) and self.gamemode == 1:
+
+                    piece = self.boardArray[row][col]
+                    piece.change_state(self.player_turn)  # Finalize the move
+
+                    # Handle capturing logic
+                    captured_positions = self.logic.capturing_territory(piece)
+
+                    if captured_positions:
+                        self.handleCapturedPieces(captured_positions)
+
+                    # Log the click and update the board
+                    clickLoc = f"({row}, {col})"
+                    print("mousePressEvent() -  Location :" + clickLoc)
+                    self.clickLocationSignal.emit(clickLoc)
+
+                    self.update_turn()
+
+
             elif self.logic.game_state() == 2 and piece.state == 3 - self.player_turn:
+
+                # Log the click
+                clickLoc = f"({row}, {col})"
+                print("mousePressEvent() -  Location :" + clickLoc)
+                self.clickLocationSignal.emit(clickLoc)
 
                 neighbor_pieces_positions = self.logic.select_neighboor_piece(
                     deepcopy(piece)

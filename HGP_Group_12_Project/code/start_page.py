@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
 
 class StartPage(QWidget):
-    newGameSignal = pyqtSignal()
+    newGameSignal = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -86,7 +86,7 @@ class StartPage(QWidget):
         # Add Normal Game button
         button_normal_game = QPushButton("Normal Game")
         button_normal_game.clicked.connect(
-            self.newGameSignal.emit
+            lambda: self.newGameSignal.emit(0)
         )  # Connect to the new game signal
         button_normal_game.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
@@ -96,7 +96,7 @@ class StartPage(QWidget):
         # Add Blitz Game button
         button_blitz_game = QPushButton("Blitz Game")
         button_blitz_game.clicked.connect(
-            self.newGameSignal.emit
+            lambda: self.newGameSignal.emit(1)
         )  # Connect to the new game signal
         button_blitz_game.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred

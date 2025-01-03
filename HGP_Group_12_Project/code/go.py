@@ -52,10 +52,11 @@ class Go(QMainWindow):
         y = (screen.height() - window_size.height()) // 2
         self.move(x, y)
 
-    def showPlayerNamesPage(self):
+    def showPlayerNamesPage(self, gamemode):
         self.stackedWidget.setCurrentWidget(self.playerNamesPage)
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
+        self.board.gamemode = gamemode
 
     def startGame(self, player1=None, player2=None):
         if player1 and player2:
