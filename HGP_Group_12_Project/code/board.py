@@ -78,8 +78,6 @@ class Board(QFrame):
             [Piece(0, r, c) for c in range(self.boardWidth)]
             for r in range(self.boardHeight)
         ]
-        self.ask_handicap()
-        self.logic = GameLogic(self.boardArray, self.handicap)
         self.printBoardArray()
         self.player_turn = 2  # black starts
         self.conssecutive_passing_turn = 0
@@ -447,15 +445,18 @@ class Board(QFrame):
         self.winner = 0
         self.player_turn = 2  # black start
         self.conssecutive_passing_turn = 0
-        self.update()
+        self.handicap_piece_player = None
         self.scoreBoard.updatePrisoners(0, 0)
         self.scoreBoard.updateTerritory(0, 0)
         self.scoreBoard.updateTurn(self.player_turn)
         self.scoreBoard.button_resign.setVisible(True)
         self.scoreBoard.button_dispute_not_success.setVisible(False)
+        self.update()
 
     def start(self):
         self.resetGame()
+        self.ask_handicap()
+        self.logic = GameLogic(self.boardArray, self.handicap)
         self.handicap_piece_player = self.logic.start()
 
         if self.handicap_piece_player:
@@ -604,13 +605,12 @@ class Board(QFrame):
             self.conssecutive_passing_turn = 0  # reset if not passing turn
 
         if self.conssecutive_passing_turn >= 2:
+            self.conssecutive_passing_turn = 0 # reset in all case
             if self.logic.game_state() == 1:
                 self.scoreBoard.button_dispute_not_success.setVisible(True)
                 self.scoreBoard.button_resign.setVisible(False)
-                self.conssecutive_passing_turn = 0
                 self.logic.end_game()
             elif self.logic.game_state() == 2:
-                self.conssecutive_passing_turn = 0
                 self.game_ended()
 
         if self.handicap_piece_player:
@@ -645,6 +645,8 @@ class Board(QFrame):
             territory_p1, territory_p2 = self.logic.count_territory()
             self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
             self.scoreBoard.updateTerritory(territory_p1, territory_p2)
+
+        print(f"player turn {self.player_turn}")
 
         # Clear pending move and update board
         self.pending_moves.clear()
@@ -689,6 +691,7 @@ class Board(QFrame):
             QMessageBox.information(self, "New Game", "Launching new game process")
             self.start()
         elif response == QMessageBox.StandardButton.No:
+            self.resetGame()
             self.scoreBoard.close()
             self.returnToMenuSignal.emit()      
 
@@ -712,7 +715,7 @@ class Board(QFrame):
             }
 
     def resignGame(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+        if self.logic.game_state() == 2:
             return
         opponent = 3 - self.player_turn
         msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
@@ -740,6 +743,7 @@ class Board(QFrame):
             QMessageBox.information(self, "New Game", "Launching new game process")
             self.start()
         elif response == QMessageBox.StandardButton.No:
+            self.resetGame()
             self.scoreBoard.close()
             self.returnToMenuSignal.emit()        
             
@@ -767,6 +771,7 @@ class Board(QFrame):
                 QMessageBox.information(self, "New Game", "Launching new game process")
                 self.start()
             elif response == QMessageBox.StandardButton.No:
+                self.resetGame()
                 self.scoreBoard.close()
                 self.returnToMenuSignal.emit()        
 
@@ -845,6 +850,7 @@ class Board(QFrame):
                         QMessageBox.information(self, "New Game", "Launching new game process")
                         self.start()
                     elif response == QMessageBox.StandardButton.No:
+                        self.resetGame()
                         self.scoreBoard.close()
                         self.returnToMenuSignal.emit()
                     return
@@ -880,6 +886,7 @@ class Board(QFrame):
                         QMessageBox.information(self, "New Game", "Launching new game process")
                         self.start()
                     elif response == QMessageBox.StandardButton.No:
+                        self.resetGame()
                         self.scoreBoard.close()
                         self.returnToMenuSignal.emit()
                     return
