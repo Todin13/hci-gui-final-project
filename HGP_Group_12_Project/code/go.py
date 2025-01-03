@@ -31,7 +31,7 @@ class Go(QMainWindow):
         self.board.resetGameSignal.connect(self.resetGame)  # Connecter le signal de réinitialisation
         self.scoreBoard.resetGameSignal.connect(self.resetGame)  # Connecter le signal de réinitialisation
         self.scoreBoard.resignSignal.connect(self.confirmResign)  # Connecter le signal de résignation
-        self.scoreBoard.disputeNotAboutSignal.connect(self.disputeNotAbout)  # Connecter le signal de dispute
+        self.scoreBoard.disputeNotSuccessingSignal.connect(self.disputeNotSuccessing)  # Connecter le signal de dispute
 
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()
@@ -86,7 +86,6 @@ class Go(QMainWindow):
         self.scoreBoard.updatePrisoners(0, 0)
         self.scoreBoard.updateTerritory(0, 0)
         self.scoreBoard.updateTurn(self.board.player_turn)
-        self.scoreBoard.button_dispute_not_about.setVisible(False)  # Hide the dispute button on reset
 
     def confirmResign(self):
         reply = QMessageBox.question(self, 'Confirm Resign', 'Are you sure you want to resign?',
@@ -98,8 +97,8 @@ class Go(QMainWindow):
     def resignGame(self):
         self.board.resignGame()
 
-    def disputeNotAbout(self):
-        self.board.disputeNotAbout()
+    def disputeNotSuccessing(self):
+        self.board.disputeNotSuccessing()
 
     def resizeEvent(self, event):
         """Adjust the size of the window based on the current page"""

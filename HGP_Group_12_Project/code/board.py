@@ -545,6 +545,7 @@ class Board(QFrame):
 
         if self.conssecutive_passing_turn >= 2:
             if self.logic.game_state() == 1:
+                QMessageBox.information(self, "Dispute not abouting situation", "Dispute not abouting situation")
                 self.conssecutive_passing_turn = 0
                 self.logic.end_game()
             elif self.logic.game_state() == 2:
@@ -605,6 +606,20 @@ class Board(QFrame):
         message_box.setWindowTitle("Winner")
         message_box.setText(msg)
 
+        # Add "Return Menu" and "New Game" buttons
+        return_menu_button = QPushButton("Return Menu")
+        new_game_button = QPushButton("New Game")
+
+        layout = QVBoxLayout()
+        layout.addWidget(return_menu_button)
+        layout.addWidget(new_game_button)
+
+        message_box.setLayout(layout)
+
+        # Connect buttons to their respective slots
+        return_menu_button.clicked.connect(self.return_to_menu)
+        new_game_button.clicked.connect(self.start_new_game)
+
         message_box.exec()
 
         self.triggerFireworksAnimation()
@@ -626,6 +641,17 @@ class Board(QFrame):
 
         self.resetGame()  # Assurez-vous que le jeu est réinitialisé à la fin
 
+    def return_to_menu(self):
+        self.parent().stackedWidget.setCurrentWidget(self.parent().startPage)
+        self.parent().adjustSize()
+        self.parent().center()
+
+    def start_new_game(self):
+        self.parent().stackedWidget.setCurrentWidget(self.board)
+        self.start()
+        self.parent().adjustSize()
+        self.parent().center()
+
     def resignGame(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
             return
@@ -635,7 +661,7 @@ class Board(QFrame):
         self.logic.stop()
         self.start()
 
-    def disputeNotAbout(self):
+    def disputeNotSuccessing(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
             QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
             self.logic.stop()

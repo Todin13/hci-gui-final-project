@@ -16,7 +16,7 @@ class ScoreBoard(QDockWidget):
     resetGameSignal = pyqtSignal()
     endGameSignal = pyqtSignal(int)  # Signal to end the game with the winner's player number
     resignSignal = pyqtSignal(int)
-    disputeNotAboutSignal = pyqtSignal()
+    disputeNotSuccessingSignal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -50,8 +50,7 @@ class ScoreBoard(QDockWidget):
         self.button_rules = QPushButton("Rules of Ko and Suicide")
         self.button_controls = QPushButton("Controls")
         self.button_resign = QPushButton("Resign")
-        self.button_dispute_not_about = QPushButton("Dispute Not About")
-        self.button_dispute_not_about.setVisible(False)  # Hide the button initially
+        self.button_dispute_not_succes = QPushButton("Dispute Not Succesful")
 
         self.mainWidget.setLayout(self.mainLayout)
         self.mainLayout.addWidget(self.label_clickLocation)
@@ -78,7 +77,7 @@ class ScoreBoard(QDockWidget):
         self.mainLayout.addWidget(self.button_rules)
         self.mainLayout.addWidget(self.button_controls)
         self.mainLayout.addWidget(self.button_resign)
-        self.mainLayout.addWidget(self.button_dispute_not_about)
+        self.mainLayout.addWidget(self.button_dispute_not_succes)
 
         self.setWidget(self.mainWidget)
 
@@ -105,7 +104,7 @@ class ScoreBoard(QDockWidget):
         self.button_pass.clicked.connect(self.pass_turn)
         self.button_reset.clicked.connect(self.resetGameSignal.emit)
         self.button_resign.clicked.connect(self.resignSignal.emit)
-        self.button_dispute_not_about.clicked.connect(self.disputeNotAboutSignal.emit)
+        self.button_dispute_not_succes.clicked.connect(self.disputeNotSuccessingSignal.emit)
 
         # Connect navigation buttons to board methods
         self.button_prev.clicked.connect(self.board.PreviousPendingMove)
@@ -141,12 +140,6 @@ class ScoreBoard(QDockWidget):
 
     def pass_turn(self):
         self.pass_count += 1
-        if self.pass_count >= 2:
-            QMessageBox.information(self, "Dispute not about situation", "Dispute not about situation")
-            self.button_dispute_not_about.setVisible(True)  # Show the button
-            self.pass_count = 0  # Reset the pass count
-        else:
-            self.button_dispute_not_about.setVisible(False)  # Hide the button if not two consecutive passes
         self.passTurnSignal.emit()
 
     def showKoSuicideRules(self):
@@ -173,5 +166,5 @@ class ScoreBoard(QDockWidget):
     def resign(self):
         self.resignSignal.emit(self.board.player_turn)
 
-    def disputeNotAbout(self):
-        self.disputeNotAboutSignal.emit()
+    def disputeNotSuccessing(self):
+        self.disputeNotSuccessingSignal.emit()
