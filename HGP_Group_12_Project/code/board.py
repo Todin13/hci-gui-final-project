@@ -3,6 +3,8 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
+from copy import deepcopy
+from PyQt6.QtWidgets import QMessageBox
 
 
 class Board(QFrame):
@@ -11,8 +13,6 @@ class Board(QFrame):
 
     boardWidth = 9  # 9x9 Goban
     boardHeight = 9
-    player_turn = 1  # 1 for white, 2 for black
-    isStarted = False
 
     def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
@@ -21,7 +21,6 @@ class Board(QFrame):
         self.initBoard()
         self.pending_moves = []  # List to track all pending moves
         self.current_pending_index = -1  # Index of the currently viewed pending move
-        self.ko = None
 
         # Load assets
         self.background_pixmap = QPixmap(
@@ -100,6 +99,10 @@ class Board(QFrame):
         # Draw captured pieces
         self.drawCapturedPieces(painter)
 
+        if hasattr(self, "highlight_positions") and self.highlight_positions:
+            self.highlightPieces(painter, self.highlight_positions)
+
+
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
         if not self.background_pixmap.isNull():
@@ -114,7 +117,6 @@ class Board(QFrame):
 
     def mousePressEvent(self, event):
         """This event is automatically called when the mouse is pressed"""
-        assert self.logic.board == self.boardArray
 
         if not (
             self.top_left_x
@@ -135,8 +137,8 @@ class Board(QFrame):
         if self.logic.existing_position(row, col):
 
             piece = self.boardArray[row][col]
-
-            if piece.state == 0:
+           
+            if self.logic.game_state() == 1 and piece.state == 0:
 
                 new_piece = Piece(self.player_turn, row, col)
 
@@ -149,6 +151,24 @@ class Board(QFrame):
                     self.pending_moves.append({"row":row, "col":col, "piece":new_piece})
                     self.current_pending_index = len(self.pending_moves) - 1
                     self.update()
+            elif self.logic.game_state() == 2 and piece.state == 3 - self.player_turn:
+
+                neighbor_pieces_positions = self.logic.select_neighboor_piece(deepcopy(piece))
+
+                # TODO implement glowing piece like surround them in blue ?
+                self.triggerHighlight(neighbor_pieces_positions)
+
+                captured_positions = self.logic.remove_dead_pieces_box(self.player_turn, neighbor_pieces_positions)
+
+                if captured_positions:
+                    self.setMouseTracking(False)
+                    self.handleCapturedPieces(captured_positions)
+                    self.setMouseTracking(True)
+
+                    self.update_turn()
+                
+                else:
+                    self.logic.dead_pieces_debate()
             
 
     def PreviousPendingMove(self):
@@ -195,19 +215,7 @@ class Board(QFrame):
         print("mousePressEvent() -  Location :" + clickLoc)
         self.clickLocationSignal.emit(clickLoc)
 
-        # Update scores and alternate turns
-        prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
-        territory_p1, territory_p2 = self.logic.count_territory()
-        self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
-        self.scoreBoard.updateTerritory(territory_p1, territory_p2)
-
-        self.player_turn = 3 - self.player_turn  # Toggle turn
-        self.scoreBoard.updateTurn(self.player_turn)
-
-        # Clear pending move and update board
-        self.pending_moves.clear()
-        self.current_pending_index = -1
-        self.update()
+        self.update_turn()
     
     def keyPressEvent(self, event):
         """Handle key presses for confirming or undoing moves."""
@@ -220,36 +228,37 @@ class Board(QFrame):
 
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
-        mouse_x, mouse_y = event.position().x(), event.position().y()
+        if self.logic.game_state() == 1:
+            mouse_x, mouse_y = event.position().x(), event.position().y()
 
-        square_width = self.square_side / (self.boardWidth - 1)
-        square_height = self.square_side / (self.boardHeight - 1)
+            square_width = self.square_side / (self.boardWidth - 1)
+            square_height = self.square_side / (self.boardHeight - 1)
 
-        col = round((mouse_x - self.top_left_x) / square_width)
-        row = round((mouse_y - self.top_left_y) / square_height)
+            col = round((mouse_x - self.top_left_x) / square_width)
+            row = round((mouse_y - self.top_left_y) / square_height)
 
-        # Validate hover position
-        if self.logic.existing_position(row, col):
-            if (
-                self.logic.check_piece_placement(
-                    Piece(self.player_turn, row, col), hover=True
-                )
-                and self.boardArray[row][col].state == 0
-            ):  # Only hover if position is empty and respect game rules
-                self.hover_row = row
-                self.hover_col = col
+            # Validate hover position
+            if self.logic.existing_position(row, col):
+                if (
+                    self.logic.check_piece_placement(
+                        Piece(self.player_turn, row, col), hover=True
+                    )
+                    and self.boardArray[row][col].state == 0
+                ):  # Only hover if position is empty and respect game rules
+                    self.hover_row = row
+                    self.hover_col = col
+                else:
+                    self.hover_row = -1
+                    self.hover_col = -1
             else:
                 self.hover_row = -1
                 self.hover_col = -1
-        else:
-            self.hover_row = -1
-            self.hover_col = -1
 
-        self.update()  # Trigger repaint
+            self.update()  # Trigger repaint
 
     def drawHoverPiece(self, painter):
         """Draw a semi-transparent piece at the hovered position if valid."""
-        if self.hover_row == -1 or self.hover_col == -1:
+        if self.hover_row == -1 or self.hover_col == -1 or self.logic.game_state() != 1:
             return
 
         square_width = self.square_side / (self.boardWidth - 1)
@@ -346,10 +355,12 @@ class Board(QFrame):
     def resetGame(self):
         self.initBoard()
         self.player_turn = 2 # black start
+        self.conssecutive_passing_turn = 0
         self.update()
 
     def start(self):
         self.resetGame()
+        self.logic.start()
         print("Game started")
 
     def drawBoardLines(self, painter):
@@ -408,6 +419,34 @@ class Board(QFrame):
             painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
             painter.setOpacity(1.0)  # Reset opacity
 
+    def triggerHighlight(self, positions):
+        """Trigger a new paint event specifically for highlighting."""
+        self.highlight_positions = positions
+        self.repaint() 
+        self.highlight_positions = None
+
+    def highlightPieces(self, painter, positions):
+        """Highlight pieces at the given list of (row, col) positions."""
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        highlight_color = QColor(255, 255, 0, 128)  # Yellow with transparency
+        brush = QBrush(highlight_color)
+        painter.setBrush(brush)
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        for row, col in positions:
+            # Calculate the center of the intersection
+            center_x = self.top_left_x + col * square_width
+            center_y = self.top_left_y + row * square_height
+            size = min(square_width, square_height) * 1.0  # Slightly larger highlight
+
+            x = center_x - size / 2
+            y = center_y - size / 2
+
+            # Draw the highlight circle
+            painter.drawEllipse(int(x), int(y), int(size), int(size))
+
     def drawStars(self, painter):
         """Draw black dots (stars) at specific intersections on the board."""
         star_positions = [(3, 3), (7, 3), (5, 5), (3, 7), (7, 7)]
@@ -434,3 +473,53 @@ class Board(QFrame):
 
     def sizeHint(self):
         return QSize(800, 800)
+
+    def update_turn(self, pass_turn=False):
+
+        if pass_turn:
+            self.conssecutive_passing_turn += 1
+        else :
+            self.conssecutive_passing_turn = 0 # reset if not passing turn
+
+        if self.conssecutive_passing_turn >= 2:
+            if self.logic.game_state() == 1:
+                self.conssecutive_passing_turn = 0
+                self.logic.end_game()
+            elif self.logic.game_state() >= 2:
+                self.conssecutive_passing_turn = 0
+                self.game_ended()
+
+        # Alternate the player turn
+        self.player_turn = 3 - self.player_turn
+    
+        # Update the turn display    
+        self.scoreBoard.updateTurn(self.player_turn)
+
+        # Update prisoners and territory
+        prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
+        territory_p1, territory_p2 = self.logic.count_territory()
+        self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
+        self.scoreBoard.updateTerritory(territory_p1, territory_p2)
+
+        # Clear pending move and update board
+        self.pending_moves.clear()
+        self.current_pending_index = -1
+        self.update()
+
+    def game_ended(self):
+        self.logic.stop()
+
+        white_score, black_score = self.logic.territory_scoring()
+
+        if white_score > black_score:
+            msg = f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+        elif black_score > white_score:
+            msg = f"Black palyer win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+        else:
+            msg = "Equality"
+
+        message_box = QMessageBox()
+        message_box.setWindowTitle("Winner")
+        message_box.setText(msg)
+
+        message_box.exec()

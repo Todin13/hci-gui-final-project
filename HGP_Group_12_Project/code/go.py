@@ -30,7 +30,7 @@ class Go(QMainWindow):
 
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()
-        self.setWindowTitle("Go")
+        self.setWindowTitle("Go game")
         self.show()
 
     def center(self):
@@ -57,33 +57,21 @@ class Go(QMainWindow):
         self.scoreBoard.make_connection(self.board)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
         self.scoreBoard.passTurnSignal.connect(self.pass_turn)
-        self.scoreBoard.resetGameSignal.connect(self.resetGame)
-        self.scoreBoard.endGameSignal.connect(self.endGame)
+        self.scoreBoard.resetGameSignal.connect(self.resetGame) 
         print(f"Game started with players: {player1} vs {player2}")
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
 
     def pass_turn(self):
-        self.board.player_turn = 3 - self.board.player_turn  # Switch turn
-        self.board.print_player_turn()
-        self.scoreBoard.updateTurn(self.board.player_turn)
-        self.scoreBoard.reset_pass_count()
+        self.board.update_turn(True)
+        
 
     def resetGame(self):
-        self.board.resetGame()
-        self.board.player_turn = 1  # Ensure white player starts first
+        self.board.start()
         self.board.print_player_turn()
         self.scoreBoard.updatePrisoners(0, 0)
         self.scoreBoard.updateTerritory(0, 0)
         self.scoreBoard.updateTurn(self.board.player_turn)
-
-    def endGame(self, winner):
-        if winner == 0:
-            QMessageBox.information(self, "Game Over", "The game ended in a draw.")
-        else:
-            winner_name = "Player 1" if winner == 1 else "Player 2"
-            QMessageBox.information(self, "Game Over", f"{winner_name} wins the game!")
-        self.resetGame()
 
     def resizeEvent(self, event):
         """Adjust the size of the window based on the current page"""

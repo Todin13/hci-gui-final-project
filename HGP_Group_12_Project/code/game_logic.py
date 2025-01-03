@@ -1,26 +1,35 @@
 from piece import Piece
 from copy import deepcopy
+from PyQt6.QtWidgets import QMessageBox
 
 
 class GameLogic:
-    print("Game Logic Object Created")
-    # TODO add code here to manage the logic of your game
-
+    
     def __init__(self, board: list[list[Piece]], komi=6.5):
         """
         Init of game logic, komi is the point compensation given to white player as it's black who start here 6.5 as we follow japanese rules
         """
         self.board = board  # saving the pointing to the board
-        self.score = 0  # init the score
-        self.top = len(board)  # getting the max index + 1
-        self.ko_state = False  # ko state round before, init as false
-        self.prisoners_p1 = 0  # Counter for Player 1's prisoners
-        self.prisoners_p2 = 0  # Counter for Player 2's prisoners
-        self.territory_p1 = 0  # Territory count for player 1
-        self.territory_p2 = 0  # Territory cunt for player 2
-        self.komi = komi
-        self.score_p1 = komi
-        self.score_p2 = 0
+        self.__top = len(board)  # getting the max index + 1
+        self.__ko_state = False  # ko state round before, init as false
+        self.__prisoners_p1 = 0  # Counter for Player 1's prisoners
+        self.__prisoners_p2 = 0  # Counter for Player 2's prisoners
+        self.__territory_p1 = 0  # Territory count for player 1
+        self.__territory_p2 = 0  # Territory cunt for player 2
+        self.__komi = komi
+        self.__score_p1 = 0 
+        self.__score_p2 = 0
+        self.__game_state = 0 # not playing
+        self.__final_board = None
+
+    def start(self):
+        self.__game_state = 1
+
+    def stop(self):
+        self.__game_state = 0
+
+    def game_state(self):
+        return self.__game_state
 
     def check_piece_placement(self, new_piece: Piece, hover=False):
         """
@@ -33,12 +42,12 @@ class GameLogic:
             return False
 
         # check if the last move created a ko and if this move is in the ko
-        if self.ko_state and is_in_ko:
+        if self.__ko_state and is_in_ko:
             return False
 
         # if the move is ko or if  last move is ko changing ko state
-        if (is_in_ko or self.ko_state) and not hover:
-            self.ko_state = not self.ko_state
+        if (is_in_ko or self.__ko_state) and not hover:
+            self.__ko_state = not self.__ko_state
 
         return True
 
@@ -191,7 +200,7 @@ class GameLogic:
         """
         Function that check if the given position exist on the board
         """
-        if 0 <= col < self.top and 0 <= row < self.top:
+        if 0 <= col < self.__top and 0 <= row < self.__top:
             return True
         else:
             return False
@@ -222,11 +231,9 @@ class GameLogic:
                             captured_positions.append((captured_row, captured_col))
 
                             if captured_piece.state == 1:
-                                print("capture un prisonnier blanc")
-                                self.prisoners_p2 += 1
+                                self.__prisoners_p2 += 1
                             elif captured_piece.state == 2:
-                                print("capture un prisonnier noir")
-                                self.prisoners_p1 += 1
+                                self.__prisoners_p1 += 1
 
                             self.board[captured_row][captured_col].change_state(0)
 
@@ -234,7 +241,7 @@ class GameLogic:
 
     def count_prisoners(self):
         """Count the number of prisoners for each player"""
-        return self.prisoners_p1, self.prisoners_p2
+        return self.__prisoners_p1, self.__prisoners_p2
 
     def count_territory(self):
         """Count the territory for each player"""
@@ -245,8 +252,8 @@ class GameLogic:
         if sum([sum([p.state for p in row]) for row in self.board]) < 3:
             return 0, 0
 
-        for row in range(self.top):
-            for col in range(self.top):
+        for row in range(self.__top):
+            for col in range(self.__top):
                 piece = deepcopy(self.board[row][col])
                 if piece.state == 0 and (row, col) not in visited:
                     territory, owner = self.flood_fill_territory(row, col, visited)
@@ -255,8 +262,8 @@ class GameLogic:
                     elif owner == 2:
                         territory_p2 += territory
 
-        self.territory_p1 = territory_p1
-        self.territory_p2 = territory_p2
+        self.__territory_p1 = territory_p1
+        self.__territory_p2 = territory_p2
 
         return territory_p1, territory_p2
 
@@ -288,25 +295,104 @@ class GameLogic:
         """
         Counting point based on the Japanese go's rules (territory scoring)
         """
-        
-        self.score_p1 = self.territory_p1 - self.prisoners_p2 + self.komi
-        self.score_p2 = self.territory_p2 - self.prisoners_p1
 
-        return self.score_p1, self.score_p2
+        self.__score_p1 = self.__territory_p1 - self.__prisoners_p1 + self.__komi
+        self.__score_p2 = self.__territory_p2 - self.__prisoners_p2
+
+        return self.__score_p1, self.__score_p2
 
     def area_scoring(self):
         """
         Scocring based on the Chinese rules (area scoring)
         """
 
-        self.score_p1 = self.territory_p1 + self.komi
-        self.score_p2 = self.territory_p2
+        self.__score_p1 = self.__territory_p1 + self.__komi
+        self.__score_p2 = self.__territory_p2
 
         for row in self.board:
             for piece in row:
                 if piece.state == 1:
-                    self.score_p1 += 1
+                    self.__score_p1 += 1
                 elif piece.state == 2:
-                    self.score_p2 +=1
+                    self.__score_p2 +=1
 
-        return self.score_p1, self.score_p2
+        return self.__score_p1, self.__score_p2
+
+
+    def end_game(self):
+        """
+        Implementation of the end game before territory scoring 
+        """
+        self.__game_state = 2
+
+        if self.__final_board:
+            for row in range(self.__top):
+                for col in range(self.__top):
+                    final_state = self.__final_board[row][col].state
+                    actual_piece = self.board[row][col]
+                    if actual_piece.state != final_state:
+                        actual_piece.change_state(final_state)
+        
+
+    def remove_dead_pieces_box(self, player_turn, selected_pieces: list[tuple[int, int]]):
+        """
+        Function to remove dead pieces
+        """
+
+        selected_piece = Piece(3 - player_turn)
+
+        msg_txt = f"{selected_piece.name} player, do you concede that the selected pieces are dead?" # maybe permit the name of the player if ther is one
+
+        message_box = QMessageBox()
+        message_box.setWindowTitle("Concede Pieces")
+        message_box.setText(msg_txt)
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        response = message_box.exec()
+
+        if response == QMessageBox.StandardButton.Yes:
+            for captured_row, captured_col in selected_pieces:
+
+                if player_turn == 1:
+                    self.__prisoners_p2 += 1
+                elif player_turn == 2:
+                    self.__prisoners_p1 += 1
+
+                self.board[captured_row][captured_col].change_state(0)
+
+            return selected_pieces
+
+        elif response == QMessageBox.StandardButton.No:
+            return
+
+
+    def select_neighboor_piece(self, piece: Piece, visited_positions=None, visit=None):
+        """
+        Return a list of all the neighboor piece of the same state
+        """
+
+        if visited_positions == None:
+            visited_positions = set()
+
+        if visit == None:
+            visit = set()
+
+        visited_positions.add(piece.position)
+
+        row, col = piece.position
+
+        for dir_row, dir_col in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                new_row, new_col = row + dir_row, col + dir_col
+                if self.existing_position(new_row, new_col):
+                    neighbor_piece = deepcopy(self.board[new_row][new_col])
+                    if neighbor_piece.state == piece.state and neighbor_piece.position not in visited_positions: 
+                        visit.add(neighbor_piece)
+        
+        if len(visit) > 0:
+            neighbor_piece = visit.pop()
+            return self.select_neighboor_piece(neighbor_piece, visited_positions, visit)
+        
+        return [pos for pos in visited_positions]
+
+    def dead_pieces_debate(self):
+        self.__game_state = 1
+        self.__final_board = deepcopy(self.board)
