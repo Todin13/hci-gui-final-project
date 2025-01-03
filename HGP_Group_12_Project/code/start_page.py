@@ -60,13 +60,13 @@ class StartPage(QWidget):
 
     def showRules(self):
         rules = (
-            'Rules of Go:\n'
+            "Rules of Go:\n"
             '1. Go is a territory control game between "Black" and "White".\n\n'
-            '2. Go is played on a Goban, a squared board, here 9x9.\n\n'
+            "2. Go is played on a Goban, a squared board, here 9x9.\n\n"
             '3. Every turn, Black or White places a "Stone" in a free intersection on the board.\n\n'
             "4. Totally surrounding an opponnent' stone or group of stones will have those captured.\n\n"
-            '5. The winner is decided by however has the most captured stones and free intersections surrounded by their own stones.\n\n'
-            '6. The game is over when both player passes their turn.\n'
+            "5. The winner is decided by however has the most captured stones and free intersections surrounded by their own stones.\n\n"
+            "6. The game is over when both player passes their turn.\n"
         )
         QMessageBox.information(self, "Rules of Go", rules)
 

@@ -112,22 +112,4 @@ class ScoreBoard(QDockWidget):
         self.label_turn.setText(f"Turn: Player {player_turn} ({color}) to play")
 
     def pass_turn(self):
-        if self.last_player_passed is None:
-            self.last_player_passed = self.board.player_turn
-            self.pass_count = 1
-        elif self.last_player_passed == self.board.player_turn:
-            self.pass_count += 1
-        else:
-            self.last_player_passed = self.board.player_turn
-            self.pass_count = 1
-
-        if self.pass_count >= 3:
-            self.endGameSignal.emit(3 - self.board.player_turn)  # The other player wins
-        elif self.pass_count == 2:
-            self.endGameSignal.emit(0)  # The game ends in a draw
-
         self.passTurnSignal.emit()
-
-    def reset_pass_count(self):
-        self.pass_count = 0
-        self.last_player_passed = None
