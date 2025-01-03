@@ -611,24 +611,24 @@ class Board(QFrame):
 
         game_over_window = QDialog(self)
         game_over_window.setWindowTitle("Winner")
-        game_over_window.setFixedSize(300, 200)
+        # game_over_window.setFixedSize(300, 200)
 
         layout = QVBoxLayout()
 
         layout.addWidget(msg)
 
-        # Buttons layout
-        buttons_layout = QHBoxLayout()
+        # # Buttons layout
+        # buttons_layout = QVBoxLayout()
 
-        return_menu_button = QPushButton("Return Menu")
-        return_menu_button.clicked.connect(self.return_to_menu)
-        buttons_layout.addWidget(return_menu_button)
+        # return_menu_button = QPushButton("Return Menu")
+        # return_menu_button.clicked.connect(self.return_to_menu)
+        # buttons_layout.addWidget(return_menu_button)
 
-        new_game_button = QPushButton("New Game")
-        new_game_button.clicked.connect(self.start)
-        buttons_layout.addWidget(new_game_button)
+        # new_game_button = QPushButton("New Game")
+        # new_game_button.clicked.connect(self.start)
+        # buttons_layout.addWidget(new_game_button)
 
-        layout.addLayout(buttons_layout)
+        # layout.addLayout(buttons_layout)
 
         game_over_window.setLayout(layout)
         game_over_window.exec()
@@ -649,9 +649,9 @@ class Board(QFrame):
                 "komi": "6.5",
             }
 
-    def return_to_menu(self):
-        """Return to the main menu."""
-        self.returnToMenuSignal.emit()
+    # def return_to_menu(self):
+    #     """Return to the main menu."""
+    #     self.returnToMenuSignal.emit()
 
     def resignGame(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:

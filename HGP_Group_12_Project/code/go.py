@@ -32,7 +32,7 @@ class Go(QMainWindow):
         self.scoreBoard.resetGameSignal.connect(self.resetGame)  # Connecter le signal de réinitialisation
         self.scoreBoard.resignSignal.connect(self.confirmResign)  # Connecter le signal de résignation
         self.scoreBoard.disputeNotSuccessingSignal.connect(self.confirmDisputeNotSuccessful)  # Connecter le signal de dispute
-        self.board.returnToMenuSignal.connect(self.showStartPage)  # Connecter le signal pour retourner au menu
+        # self.board.returnToMenuSignal.connect(self.showStartPage)  # Connecter le signal pour retourner au menu
 
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()
@@ -90,22 +90,22 @@ class Go(QMainWindow):
 
     def confirmResign(self):
         reply = QMessageBox.question(self, 'Confirm Resign', 'Are you sure you want to resign?',
-                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                                    QMessageBox.StandardButton.No)
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                     QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             self.resignGame()
 
     def confirmDisputeNotSuccessful(self):
         reply = QMessageBox.question(self, 'Confirm Dispute Not Successful', 'Are you sure you want to select : Dispute not successful?',
-                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                                    QMessageBox.StandardButton.No)
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                     QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             self.disputeNotSuccessing()
 
-    def showStartPage(self):
-        self.stackedWidget.setCurrentWidget(self.startPage)
-        self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
-        self.center()  # Centre la fenêtre
+    # def showStartPage(self):
+    #     self.stackedWidget.setCurrentWidget(self.startPage)
+    #     self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
+    #     self.center()  # Centre la fenêtre
 
     def resignGame(self):
         self.board.resignGame()
