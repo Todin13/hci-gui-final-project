@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QFrame, QDialog,  QMessageBox, QWidget, QLabel, QHBoxLayout, QStackedWidget
+from PyQt6.QtWidgets import QFrame, QDialog,  QMessageBox, QWidget, QLabel, QHBoxLayout, QStackedWidget, QVBoxLayout
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap, QKeyEvent
 from piece import Piece
@@ -670,8 +670,12 @@ class Board(QFrame):
         # layout.addLayout(buttons_layout)
 
         game_over_window.setLayout(layout)
+
+        self.triggerFireworksAnimation()
+
         game_over_window.exec()
 
+
     def ask_handicap(self):
         """
         Aking box to choose handicaps
@@ -697,34 +701,15 @@ class Board(QFrame):
             return
         opponent = 3 - self.player_turn
         msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        QMessageBox.information(self, "Game Over", msg)
+        self.triggerFireworksAnimation()
         self.logic.stop()
+        QMessageBox.information(self, "Game Over", msg)
 
     def disputeNotSuccessing(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
             QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
             self.logic.stop()
-            self.start()
 
-
-    def ask_handicap(self):
-        """
-        Aking box to choose handicaps
-        """
-
-        dialog = HandicapDialog(self.handicap)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.handicap = dialog.get_results()
-        else:
-            self.handicap = {
-                "player": 0,
-                "type": None,
-                "value": None,
-                "komi": "6.5",
-            }
-    def return_to_menu(self):
-        """Return to the main menu."""
-        self.returnToMenuSignal.emit()
 
     def triggerFireworksAnimation(self):
         firework_particles = []
@@ -763,110 +748,6 @@ class Board(QFrame):
         self.fireworks_timer.timeout.connect(animateFireworks)
         self.fireworks_timer.start(10) 
 
-    def resignGame(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            return
-        opponent = 3 - self.player_turn
-        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        QMessageBox.information(self, "Game Over", msg)
-        self.logic.stop()
-        self.start()
-
-    def disputeNotSuccessing(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
-            self.logic.stop()
-            self.start()
-
-    # def return_to_menu(self):
-    #     """Return to the main menu."""
-    #     self.returnToMenuSignal.emit()
-
-    def resignGame(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            return
-        opponent = 3 - self.player_turn
-        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        QMessageBox.information(self, "Game Over", msg)
-        self.logic.stop()
-
-    def disputeNotSuccessing(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
-            self.logic.stop()
-            self.start()
-
-
-    def ask_handicap(self):
-        """
-        Aking box to choose handicaps
-        """
-
-        dialog = HandicapDialog(self.handicap)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.handicap = dialog.get_results()
-        else:
-            self.handicap = {
-                "player": 0,
-                "type": None,
-                "value": None,
-                "komi": "6.5",
-            }
-    def return_to_menu(self):
-        """Return to the main menu."""
-        self.returnToMenuSignal.emit()
-
-    def triggerFireworksAnimation(self):
-        firework_particles = []
-
-        # Initialize firework particles
-        for _ in range(50):  # Number of particles
-            x = random.uniform(self.top_left_x, self.top_left_x + self.square_side)
-            y = random.uniform(self.top_left_y, self.top_left_y + self.square_side)
-            vx = random.uniform(-2, 2)  # Random velocity
-            vy = random.uniform(-3, -1)  # Negative for upward motion
-            lifetime = random.uniform(100, 300)  # Lifespan in frames
-            color = QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255)
-
-            firework_particles.append({
-                'x': x, 'y': y, 'vx': vx, 'vy': vy, 'lifetime': lifetime, 'color': color
-            })
-
-        # Animate fireworks
-        def animateFireworks():
-            for particle in firework_particles:
-                particle['x'] += particle['vx']
-                particle['y'] += particle['vy']
-                particle['vy'] -= 0.05  # Gravity effect
-                particle['lifetime'] -= 1
-
-            self.update()  # Update the board for each frame
-
-            # Remove dead particles
-            self.captured_pieces = [p for p in firework_particles if p['lifetime'] > 0]
-
-            if not self.captured_pieces:
-                self.fireworks_timer.stop()
-
-        # Set up a timer for the fireworks animation
-        self.fireworks_timer = QTimer(self)
-        self.fireworks_timer.timeout.connect(animateFireworks)
-        self.fireworks_timer.start(10) 
-
-    def resignGame(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            return
-        opponent = 3 - self.player_turn
-        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        QMessageBox.information(self, "Game Over", msg)
-        self.logic.stop()
-        self.start()
-
-    def disputeNotSuccessing(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
-            self.logic.stop()
-            self.start()
 
     def timerEvent(self):
         '''this event is automatically called when the timer is updated. based on the timerSpeed variable '''
@@ -881,6 +762,7 @@ class Board(QFrame):
                     message_box = QMessageBox()
                     message_box.setWindowTitle("Winner")
                     message_box.setText(msg)
+                    self.triggerFireworksAnimation()
 
                     message_box.exec()
                     return
@@ -897,6 +779,7 @@ class Board(QFrame):
                     message_box = QMessageBox()
                     message_box.setWindowTitle("Winner")
                     message_box.setText(msg)
+                    self.triggerFireworksAnimation()
 
                     message_box.exec()
                     return
