@@ -1,4 +1,13 @@
-from PyQt6.QtWidgets import QFrame, QDialog,  QMessageBox, QWidget, QLabel, QHBoxLayout, QStackedWidget
+from PyQt6.QtWidgets import (
+    QFrame,
+    QDialog,
+    QMessageBox,
+    QWidget,
+    QLabel,
+    QHBoxLayout,
+    QStackedWidget,
+    QVBoxLayout,
+)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap, QKeyEvent
 from piece import Piece
@@ -17,6 +26,8 @@ class Board(QFrame):
     boardWidth = 9  # 9x9 Goban
     boardHeight = 9
 
+    gamemode = 0
+
     def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
         self.margin = 50
@@ -24,6 +35,10 @@ class Board(QFrame):
         self.pending_moves = []  # List to track all pending moves
         self.current_pending_index = -1  # Index of the currently viewed pending move
         self.positions = []
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.timerEvent)
+        self.timerSpeed = 1000
 
         # Load assets
         self.background_pixmap = QPixmap(
@@ -153,16 +168,18 @@ class Board(QFrame):
 
                 new_piece = Piece(self.player_turn, row, col)
 
-                if self.logic.check_piece_placement(new_piece):
-                    # Set the pending move
-                    if self.pending_moves:
-                        if (
-                            row == self.pending_moves[self.current_pending_index]["row"]
-                            and col
-                            == self.pending_moves[self.current_pending_index]["col"]
-                        ):
-                            self.confirmMove()
-                            return
+                check = self.logic.check_piece_placement(new_piece)
+
+                # Set the pending move
+                if self.pending_moves:
+                    if (
+                        row == self.pending_moves[self.current_pending_index]["row"]
+                        and col == self.pending_moves[self.current_pending_index]["col"]
+                    ):
+                        self.confirmMove()
+                        return
+
+                if check and self.gamemode == 0:
 
                     self.pending_moves.append(
                         {"row": row, "col": col, "piece": new_piece}
@@ -170,7 +187,30 @@ class Board(QFrame):
                     self.current_pending_index = len(self.pending_moves) - 1
                     self.update()
 
+                elif check and self.gamemode == 1:
+
+                    piece = self.boardArray[row][col]
+                    piece.change_state(self.player_turn)  # Finalize the move
+
+                    # Handle capturing logic
+                    captured_positions = self.logic.capturing_territory(piece)
+
+                    if captured_positions:
+                        self.handleCapturedPieces(captured_positions)
+
+                    # Log the click and update the board
+                    clickLoc = f"({row}, {col})"
+                    print("mousePressEvent() -  Location :" + clickLoc)
+                    self.clickLocationSignal.emit(clickLoc)
+
+                    self.update_turn()
+
             elif self.logic.game_state() == 2 and piece.state == 3 - self.player_turn:
+
+                # Log the click
+                clickLoc = f"({row}, {col})"
+                print("mousePressEvent() -  Location :" + clickLoc)
+                self.clickLocationSignal.emit(clickLoc)
 
                 neighbor_pieces_positions = self.logic.select_neighboor_piece(
                     deepcopy(piece)
@@ -193,7 +233,6 @@ class Board(QFrame):
 
                 else:
                     self.logic.dead_pieces_debate()
-
 
     def PreviousPendingMove(self):
         """Go to the previous pending move."""
@@ -240,7 +279,6 @@ class Board(QFrame):
 
         self.update_turn()
 
-    
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
         if self.logic.game_state() == 1:
@@ -426,6 +464,12 @@ class Board(QFrame):
             message_box.setText("No handicap stones, starting the game.")
             message_box.exec()
 
+        if self.gamemode == 1:
+            self.player_1_remaining_time = 120
+            self.player_2_remaining_time = 120
+            self.timer.start(self.timerSpeed)  # start the timer with the correct speed
+            print("start () - timer is started")
+
         print("Game started")
 
     def drawBoardLines(self, painter):
@@ -603,9 +647,13 @@ class Board(QFrame):
         white_score, black_score = self.logic.territory_scoring()
 
         if white_score > black_score:
-            msg = QLabel(f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}")
+            msg = QLabel(
+                f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+            )
         elif black_score > white_score:
-            msg = QLabel(f"Black player win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}")
+            msg = QLabel(
+                f"Black player win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+            )
         else:
             msg = "Equality"
 
@@ -631,6 +679,9 @@ class Board(QFrame):
         # layout.addLayout(buttons_layout)
 
         game_over_window.setLayout(layout)
+
+        self.triggerFireworksAnimation()
+
         game_over_window.exec()
 
     def ask_handicap(self):
@@ -658,34 +709,18 @@ class Board(QFrame):
             return
         opponent = 3 - self.player_turn
         msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        QMessageBox.information(self, "Game Over", msg)
+        self.triggerFireworksAnimation()
         self.logic.stop()
+        QMessageBox.information(self, "Game Over", msg)
 
     def disputeNotSuccessing(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
+            QMessageBox.information(
+                self,
+                "Game Over",
+                "Both players lose because the dispute did not resolve.",
+            )
             self.logic.stop()
-            self.start()
-
-
-    def ask_handicap(self):
-        """
-        Aking box to choose handicaps
-        """
-
-        dialog = HandicapDialog(self.handicap)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.handicap = dialog.get_results()
-        else:
-            self.handicap = {
-                "player": 0,
-                "type": None,
-                "value": None,
-                "komi": "6.5",
-            }
-    def return_to_menu(self):
-        """Return to the main menu."""
-        self.returnToMenuSignal.emit()
 
     def triggerFireworksAnimation(self):
         firework_particles = []
@@ -697,24 +732,36 @@ class Board(QFrame):
             vx = random.uniform(-2, 2)  # Random velocity
             vy = random.uniform(-3, -1)  # Negative for upward motion
             lifetime = random.uniform(100, 300)  # Lifespan in frames
-            color = QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255)
+            color = QColor(
+                random.randint(0, 255),
+                random.randint(0, 255),
+                random.randint(0, 255),
+                255,
+            )
 
-            firework_particles.append({
-                'x': x, 'y': y, 'vx': vx, 'vy': vy, 'lifetime': lifetime, 'color': color
-            })
+            firework_particles.append(
+                {
+                    "x": x,
+                    "y": y,
+                    "vx": vx,
+                    "vy": vy,
+                    "lifetime": lifetime,
+                    "color": color,
+                }
+            )
 
         # Animate fireworks
         def animateFireworks():
             for particle in firework_particles:
-                particle['x'] += particle['vx']
-                particle['y'] += particle['vy']
-                particle['vy'] -= 0.05  # Gravity effect
-                particle['lifetime'] -= 1
+                particle["x"] += particle["vx"]
+                particle["y"] += particle["vy"]
+                particle["vy"] -= 0.05  # Gravity effect
+                particle["lifetime"] -= 1
 
             self.update()  # Update the board for each frame
 
             # Remove dead particles
-            self.captured_pieces = [p for p in firework_particles if p['lifetime'] > 0]
+            self.captured_pieces = [p for p in firework_particles if p["lifetime"] > 0]
 
             if not self.captured_pieces:
                 self.fireworks_timer.stop()
@@ -722,19 +769,43 @@ class Board(QFrame):
         # Set up a timer for the fireworks animation
         self.fireworks_timer = QTimer(self)
         self.fireworks_timer.timeout.connect(animateFireworks)
-        self.fireworks_timer.start(10) 
+        self.fireworks_timer.start(10)
 
-    def resignGame(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            return
-        opponent = 3 - self.player_turn
-        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        QMessageBox.information(self, "Game Over", msg)
-        self.logic.stop()
-        self.start()
+    def timerEvent(self):
+        """this event is automatically called when the timer is updated. based on the timerSpeed variable"""
 
-    def disputeNotSuccessing(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
-            self.logic.stop()
-            self.start()
+        if self.logic.game_state() == 1 and not self.handicap_piece_player:
+
+            if self.player_turn == 1:
+                if self.player_1_remaining_time == 0:
+                    print("Game over for player 1")
+                    self.logic.stop()
+                    msg = "Black player win by timeout"
+                    message_box = QMessageBox()
+                    message_box.setWindowTitle("Winner")
+                    message_box.setText(msg)
+                    self.triggerFireworksAnimation()
+
+                    message_box.exec()
+                    return
+
+                self.player_1_remaining_time -= 1
+                print("timerEvent() for palyer 1", self.player_1_remaining_time)
+                self.updateTimerSignal.emit(self.player_1_remaining_time)
+
+            if self.player_turn == 2:
+                if self.player_2_remaining_time == 0:
+                    print("Game over for player 2")
+                    self.logic.stop()
+                    msg = "White player win by timeout"
+                    message_box = QMessageBox()
+                    message_box.setWindowTitle("Winner")
+                    message_box.setText(msg)
+                    self.triggerFireworksAnimation()
+
+                    message_box.exec()
+                    return
+
+                self.player_2_remaining_time -= 1
+                print("timerEvent() for palyer 1", self.player_2_remaining_time)
+                self.updateTimerSignal.emit(self.player_2_remaining_time)

@@ -9,54 +9,57 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
 
+
 class StartPage(QWidget):
-    newGameSignal = pyqtSignal()
+    newGameSignal = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
         self.initUI()
 
     def initUI(self):
-
-        layout = QVBoxLayout()
+        # Clear the existing layout before reinitializing
+        self.clearLayout(self.layout)
 
         # Add a space at the top to center vertically
-        layout.addSpacerItem(
+        self.layout.addSpacerItem(
             QSpacerItem(
                 20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
             )
         )
 
-        label = QLabel("Welcome to the Go game !")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        layout.addWidget(label)
+        self.label = QLabel("Welcome to the Go game !")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        self.layout.addWidget(self.label)
 
         # Add a space between the label and the button
-        layout.addSpacing(20)
+        self.layout.addSpacing(20)
 
-        button_new_game = QPushButton("New game")
-        button_new_game.clicked.connect(self.newGameSignal.emit)
-        button_new_game.setSizePolicy(
+        self.button_new_game = QPushButton("New game")
+        self.button_new_game.clicked.connect(self.showGameOptions)
+        self.button_new_game.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
-        layout.addWidget(button_new_game)
+        self.layout.addWidget(self.button_new_game)
 
-        button_rules = QPushButton("How to play")
-        button_rules.clicked.connect(self.showRules)
-        button_rules.setSizePolicy(
+        self.button_rules = QPushButton("How to play")
+        self.button_rules.clicked.connect(self.showRules)
+        self.button_rules.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
-        layout.addWidget(button_rules)
+        self.layout.addWidget(self.button_rules)
 
         # Add a space at the bottom to center vertically
-        layout.addSpacerItem(
+        self.layout.addSpacerItem(
             QSpacerItem(
                 20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
             )
         )
-
-        self.setLayout(layout)
 
     def showRules(self):
         rules = (
@@ -72,3 +75,54 @@ class StartPage(QWidget):
 
     def sizeHint(self):
         return QSize(400, 200)  # Define a preferred size for the window
+
+    def showGameOptions(self):
+        # Clear the layout
+        self.clearLayout(self.layout)
+
+        # Update the label
+        self.label.setText("Select Game Mode")
+        self.layout.addWidget(self.label)
+
+        # Add Normal Game button
+        button_normal_game = QPushButton("Normal Game")
+        button_normal_game.clicked.connect(
+            lambda: self.newGameSignal.emit(0)
+        )  # Connect to the new game signal
+        button_normal_game.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        self.layout.addWidget(button_normal_game)
+
+        # Add Blitz Game button
+        button_blitz_game = QPushButton("Blitz Game")
+        button_blitz_game.clicked.connect(
+            lambda: self.newGameSignal.emit(1)
+        )  # Connect to the new game signal
+        button_blitz_game.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        self.layout.addWidget(button_blitz_game)
+
+        # Add Return button
+        button_return = QPushButton("Return")
+        button_return.clicked.connect(self.initUI)
+        button_return.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        self.layout.addWidget(button_return)
+
+        # Add a space at the bottom to center vertically
+        self.layout.addSpacerItem(
+            QSpacerItem(
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
+
+    def clearLayout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self.clearLayout(item.layout())
