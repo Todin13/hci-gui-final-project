@@ -1,10 +1,11 @@
-from PyQt6.QtWidgets import QFrame
+from PyQt6.QtWidgets import QFrame, QDialog
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
 from copy import deepcopy
 from PyQt6.QtWidgets import QMessageBox
+from handicap import HandicapDialog
 
 
 class Board(QFrame):
@@ -18,7 +19,6 @@ class Board(QFrame):
         super().__init__(parent)
         self.margin = 40
         self.scoreBoard = scoreBoard  # Store the scoreBoard reference
-        self.initBoard()
         self.pending_moves = []  # List to track all pending moves
         self.current_pending_index = -1  # Index of the currently viewed pending move
 
@@ -49,13 +49,16 @@ class Board(QFrame):
         )
         self.setMouseTracking(True)  # Enable mouse tracking
 
+        self.handicap = {"player": 0, "type": None, "value": None, "komi": "6.5"}
+
     def initBoard(self):
         """Initializes the board."""
         self.boardArray = [
             [Piece(0, r, c) for c in range(self.boardWidth)]
             for r in range(self.boardHeight)
         ]
-        self.logic = GameLogic(self.boardArray)
+        self.ask_handicap()
+        self.logic = GameLogic(self.boardArray, self.handicap)
         self.printBoardArray()
 
     def printBoardArray(self):
@@ -151,11 +154,13 @@ class Board(QFrame):
                         ):
                             self.confirmMove()
                             return
+
                     self.pending_moves.append(
                         {"row": row, "col": col, "piece": new_piece}
                     )
                     self.current_pending_index = len(self.pending_moves) - 1
                     self.update()
+
             elif self.logic.game_state() == 2 and piece.state == 3 - self.player_turn:
 
                 neighbor_pieces_positions = self.logic.select_neighboor_piece(
@@ -358,7 +363,24 @@ class Board(QFrame):
 
     def start(self):
         self.resetGame()
-        self.logic.start()
+        self.handicap_piece_player = self.logic.start()
+
+        if self.handicap_piece_player:
+            self.player_turn = self.handicap_piece_player
+
+            message_box = QMessageBox()
+            message_box.setWindowTitle("Placing Handicap Stone")
+            message_box.setText(
+                f"{Piece(self.player_turn).name} need to place {self.logic.handicap_pieces_left}, before starting the game."
+            )
+            message_box.exec()
+
+        else:
+            message_box = QMessageBox()
+            message_box.setWindowTitle("Starting Game")
+            message_box.setText("No handicap stones, starting the game.")
+            message_box.exec()
+
         print("Game started")
 
     def drawBoardLines(self, painter):
@@ -486,21 +508,42 @@ class Board(QFrame):
             if self.logic.game_state() == 1:
                 self.conssecutive_passing_turn = 0
                 self.logic.end_game()
-            elif self.logic.game_state() >= 2:
+            elif self.logic.game_state() == 2:
                 self.conssecutive_passing_turn = 0
                 self.game_ended()
 
-        # Alternate the player turn
-        self.player_turn = 3 - self.player_turn
+        if self.handicap_piece_player:
 
-        # Update the turn display
-        self.scoreBoard.updateTurn(self.player_turn)
+            if self.logic.handicap_pieces_left > 1:
 
-        # Update prisoners and territory
-        prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
-        territory_p1, territory_p2 = self.logic.count_territory()
-        self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
-        self.scoreBoard.updateTerritory(territory_p1, territory_p2)
+                self.logic.handicap_pieces_left -= 1
+
+            elif self.logic.handicap_pieces_left == 1:
+
+                self.logic.handicap_pieces_left = None
+                self.handicap_piece_player = None
+
+                message_box = QMessageBox()
+                message_box.setWindowTitle("Starting Game")
+                message_box.setText(
+                    f"{Piece(self.player_turn).name} player finished placing his handicap pieces.\nNow starting the game."
+                )
+                message_box.exec()
+
+                self.player_turn = 2
+
+        else:
+            # Alternate the player turn
+            self.player_turn = 3 - self.player_turn
+
+            # Update the turn display
+            self.scoreBoard.updateTurn(self.player_turn)
+
+            # Update prisoners and territory
+            prisoners_p1, prisoners_p2 = self.logic.count_prisoners()
+            territory_p1, territory_p2 = self.logic.count_territory()
+            self.scoreBoard.updatePrisoners(prisoners_p1, prisoners_p2)
+            self.scoreBoard.updateTerritory(territory_p1, territory_p2)
 
         # Clear pending move and update board
         self.pending_moves.clear()
@@ -524,3 +567,19 @@ class Board(QFrame):
         message_box.setText(msg)
 
         message_box.exec()
+
+    def ask_handicap(self):
+        """
+        Aking box to choose handicaps
+        """
+
+        dialog = HandicapDialog(self.handicap)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.handicap = dialog.get_results()
+        else:
+            self.handicap = {
+                "player": 0,
+                "type": None,
+                "value": None,
+                "komi": "6.5",
+            }

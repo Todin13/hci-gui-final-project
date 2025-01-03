@@ -97,7 +97,6 @@ class ScoreBoard(QDockWidget):
         self.button_prev.clicked.connect(self.board.PreviousPendingMove)
         self.button_next.clicked.connect(self.board.NextPendingMove)
 
-
     @pyqtSlot(
         str
     )  # Checks to make sure that the following slot is receiving an argument of the type 'int'
