@@ -170,8 +170,10 @@ class ScoreBoard(QDockWidget):
         controls = (
             "- Click on a free space to add a temporary Stone.\n\n"
             "- Click again on the current temporary Stone to confirm the move.\n\n"
-            "- Press Left arrow or Right arrow to navigate through your temporary Stones\n\n\n"
             '- Click on "Pass" to pass your turn.\nReminder: 2 passes = end of game\n\n'
+            '- Click on "Previous Move" and "Next Move" to navigate between all of your tempory place stone\n\n'
+            '- Click on "Resign" to declare forfeit\n\n'
+            '- Click on "Dispute Not Successful" if you don\'t find an agreement during the dispute phase'
             '- Click on "Reset Game" to clear the board and restart.'
         )
         QMessageBox.information(self, "Controls", controls)
