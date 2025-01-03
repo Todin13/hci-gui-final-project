@@ -22,29 +22,29 @@ class StartPage(QWidget):
         self.setStyleSheet(
             """
             QWidget {
-                background-color:  #77b1f2;
+                background-color: #2e2e2e; /* Dark background color */
                 font-family: Arial, sans-serif;
                 font-size: 14px;
-                color: #333333;
+                color: #2e2e2e; /* Light gray text for contrast */
             }
             QLabel {
                 font-size: 20px;
                 font-weight: bold;
-                color: #222222;
+                color: #ffffff; /* White text for labels */
             }
             QPushButton {
-                background-color: #784212;
-                color: white;
+                background-color: #8B4513; /* Wooden brown color */
+                color: #ffffff; /* White text */
                 font-size: 16px;
                 border: none;
                 padding: 10px;
                 border-radius: 5px;
             }
             QPushButton:hover {
-                background-color: #45a049;
+                background-color: #A0522D; /* Lighter brown on hover */
             }
             QPushButton:pressed {
-                background-color: #3e8e41;
+                background-color: #6A3918; /* Darker brown when pressed */
             }
             """
         )
