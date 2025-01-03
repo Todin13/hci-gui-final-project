@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
 
+
 class StartPage(QWidget):
     newGameSignal = pyqtSignal(int)
 

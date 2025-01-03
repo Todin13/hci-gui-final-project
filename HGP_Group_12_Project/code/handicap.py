@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QMessageBox,
-    QDoubleSpinBox
+    QDoubleSpinBox,
 )
 
 
@@ -94,7 +94,6 @@ class HandicapDialog(QDialog):
         self.setLayout(layout)
         self.update_ui("None")  # Initialize UI state
 
-
     def update_ui(self, player):
         """Update UI based on player selection."""
         self.selected_player = player
@@ -125,7 +124,6 @@ class HandicapDialog(QDialog):
 
         self.spin_box.setEnabled(True)
 
-
     def update_komi(self, komi):
         """Update the selected Komi value."""
         self.selected_komi = komi
@@ -139,8 +137,6 @@ class HandicapDialog(QDialog):
                 if self.point_radio.isChecked()
                 else ("Pieces" if self.piece_radio.isChecked() else None)
             ),
-            "value": (
-                self.spin_box.value() if self.spin_box.isEnabled() else None
-            ),
+            "value": (self.spin_box.value() if self.spin_box.isEnabled() else None),
             "komi": self.selected_komi,
         }

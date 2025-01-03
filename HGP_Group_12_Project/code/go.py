@@ -1,9 +1,18 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox, QVBoxLayout, QWidget, QPushButton
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QStackedWidget,
+    QMessageBox,
+    QVBoxLayout,
+    QWidget,
+    QPushButton,
+)
 from PyQt6.QtCore import Qt, QSize
 from board import Board
 from score_board import ScoreBoard
 from start_page import StartPage
 from player_names_page import PlayerNamesPage
+
 
 class Go(QMainWindow):
     def __init__(self):
@@ -12,7 +21,7 @@ class Go(QMainWindow):
 
     def initUI(self):
         """Initiates application UI"""
-        
+
         self.stackedWidget = QStackedWidget()
         self.setCentralWidget(self.stackedWidget)
 
@@ -28,10 +37,18 @@ class Go(QMainWindow):
         self.startPage.newGameSignal.connect(self.showPlayerNamesPage)
         self.playerNamesPage.startGameSignal.connect(self.startGame)
 
-        self.board.resetGameSignal.connect(self.resetGame)  # Connecter le signal de réinitialisation
-        self.scoreBoard.resetGameSignal.connect(self.resetGame)  # Connecter le signal de réinitialisation
-        self.scoreBoard.resignSignal.connect(self.confirmResign)  # Connecter le signal de résignation
-        self.scoreBoard.disputeNotSuccessingSignal.connect(self.confirmDisputeNotSuccessful)  # Connecter le signal de dispute
+        self.board.resetGameSignal.connect(
+            self.resetGame
+        )  # Connecter le signal de réinitialisation
+        self.scoreBoard.resetGameSignal.connect(
+            self.resetGame
+        )  # Connecter le signal de réinitialisation
+        self.scoreBoard.resignSignal.connect(
+            self.confirmResign
+        )  # Connecter le signal de résignation
+        self.scoreBoard.disputeNotSuccessingSignal.connect(
+            self.confirmDisputeNotSuccessful
+        )  # Connecter le signal de dispute
         # self.board.returnToMenuSignal.connect(self.showStartPage)  # Connecter le signal pour retourner au menu
 
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
@@ -73,7 +90,9 @@ class Go(QMainWindow):
             self.scoreBoard.make_connection(self.board)
             self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
             self.scoreBoard.passTurnSignal.connect(self.pass_turn)
-            self.scoreBoard.updatePlayerNames("Player 1", "Player 2")  # Update player names
+            self.scoreBoard.updatePlayerNames(
+                "Player 1", "Player 2"
+            )  # Update player names
             print("New game started")
 
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
@@ -90,16 +109,24 @@ class Go(QMainWindow):
         self.scoreBoard.updateTurn(self.board.player_turn)
 
     def confirmResign(self):
-        reply = QMessageBox.question(self, 'Confirm Resign', 'Are you sure you want to resign?',
-                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                                     QMessageBox.StandardButton.No)
+        reply = QMessageBox.question(
+            self,
+            "Confirm Resign",
+            "Are you sure you want to resign?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
         if reply == QMessageBox.StandardButton.Yes:
             self.resignGame()
 
     def confirmDisputeNotSuccessful(self):
-        reply = QMessageBox.question(self, 'Confirm Dispute Not Successful', 'Are you sure you want to select : Dispute not successful?',
-                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                                     QMessageBox.StandardButton.No)
+        reply = QMessageBox.question(
+            self,
+            "Confirm Dispute Not Successful",
+            "Are you sure you want to select : Dispute not successful?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
         if reply == QMessageBox.StandardButton.Yes:
             self.disputeNotSuccessing()
 
