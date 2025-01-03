@@ -498,7 +498,7 @@ class Board(QFrame):
         print(f"Player {self.player_turn} ({color}) turn")
 
     def sizeHint(self):
-        return QSize(1100, 800)
+        return QSize(950, 800)
 
     def update_turn(self, pass_turn=False):
 
