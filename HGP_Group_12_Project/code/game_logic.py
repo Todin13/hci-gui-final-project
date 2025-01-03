@@ -356,6 +356,12 @@ class GameLogic:
                     actual_piece = self.board[row][col]
                     if actual_piece.state != final_state:
                         actual_piece.change_state(final_state)
+        
+        message_box = QMessageBox()
+        message_box.setWindowTitle("Ending game mode")
+        message_box.setText("Starting the ending game mode, select the dead piece to remove.")
+        message_box.exec()
+
 
     def remove_dead_pieces_box(
         self, player_turn, selected_pieces: list[tuple[int, int]]
@@ -426,3 +432,8 @@ class GameLogic:
         self.__game_state = 1
         self.__final_board = deepcopy(self.board)
         self.__count_prisoner = False
+
+        message_box = QMessageBox()
+        message_box.setWindowTitle("Dispute mode")
+        message_box.setText("Starting the dispute mode.")
+        message_box.exec()

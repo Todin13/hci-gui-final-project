@@ -373,6 +373,12 @@ class Board(QFrame):
             message_box.setText(f"{Piece(self.player_turn).name} need to place {self.logic.handicap_pieces_left}, before starting the game.")
             message_box.exec()
 
+        else: 
+            message_box = QMessageBox()
+            message_box.setWindowTitle("Starting Game")
+            message_box.setText("No handicap stones, starting the game.")
+            message_box.exec()
+
         print("Game started")
 
     def drawBoardLines(self, painter):
@@ -500,7 +506,7 @@ class Board(QFrame):
             if self.logic.game_state() == 1:
                 self.conssecutive_passing_turn = 0
                 self.logic.end_game()
-            elif self.logic.game_state() >= 2:
+            elif self.logic.game_state() == 2:
                 self.conssecutive_passing_turn = 0
                 self.game_ended()
 
