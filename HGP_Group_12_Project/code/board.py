@@ -5,6 +5,7 @@ from piece import Piece
 from game_logic import GameLogic
 from copy import deepcopy
 from handicap import HandicapDialog
+import random
 
 
 class Board(QFrame):
@@ -570,6 +571,8 @@ class Board(QFrame):
 
         message_box.exec()
 
+        self.triggerFireworksAnimation()
+
     def ask_handicap(self):
         """
         Aking box to choose handicaps
@@ -585,3 +588,40 @@ class Board(QFrame):
                 "value": None,
                 "komi": "6.5",
             }
+
+    def triggerFireworksAnimation(self):
+        firework_particles = []
+
+        # Initialize firework particles
+        for _ in range(50):  # Number of particles
+            x = random.uniform(self.top_left_x, self.top_left_x + self.square_side)
+            y = random.uniform(self.top_left_y, self.top_left_y + self.square_side)
+            vx = random.uniform(-2, 2)  # Random velocity
+            vy = random.uniform(-3, -1)  # Negative for upward motion
+            lifetime = random.uniform(100, 300)  # Lifespan in frames
+            color = QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255)
+
+            firework_particles.append({
+                'x': x, 'y': y, 'vx': vx, 'vy': vy, 'lifetime': lifetime, 'color': color
+            })
+
+        # Animate fireworks
+        def animateFireworks():
+            for particle in firework_particles:
+                particle['x'] += particle['vx']
+                particle['y'] += particle['vy']
+                particle['vy'] -= 0.05  # Gravity effect
+                particle['lifetime'] -= 1
+
+            self.update()  # Update the board for each frame
+
+            # Remove dead particles
+            self.captured_pieces = [p for p in firework_particles if p['lifetime'] > 0]
+
+            if not self.captured_pieces:
+                self.fireworks_timer.stop()
+
+        # Set up a timer for the fireworks animation
+        self.fireworks_timer = QTimer(self)
+        self.fireworks_timer.timeout.connect(animateFireworks)
+        self.fireworks_timer.start(10) 
