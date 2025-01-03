@@ -11,20 +11,16 @@ done have shadow stone where mouse is
 done add effects when pieces does something
 done undo redo move button and list
 done "how to" / rule ko suicide
-
-end of game :
-    glow dead stones
-    continue to debate about dead stones
-    give up button
-
-detrmine winner (japanese rules)
-
-score making (handicaps)
-
-end game when 2 passes
-
-scoreboard gui
+done end of game :
+done     glow dead stones
+done     continue to debate about dead stones
+done     give up button
+done detrmine winner (japanese rules)
+done score making (handicaps)
+done end game when 2 passes
+done scoreboard gui
+done winner animation
 
 speed go 
 
-winner animation
+fix controls ruleset
