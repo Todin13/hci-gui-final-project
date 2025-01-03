@@ -2,8 +2,23 @@ from piece import Piece
 from copy import deepcopy
 from PyQt6.QtWidgets import QMessageBox
 
+# "player": "None"
+# "type": None
+# "value": None
+# "komi": "6.5",
 
 class GameLogic:
+
+    __ko_state = False  # ko state round before, init as false
+    __prisoners_p1 = 0  # Counter for Player 1's prisoners
+    __prisoners_p2 = 0  # Counter for Player 2's prisoners
+    __territory_p1 = 0  # Territory count for player 1
+    __territory_p2 = 0  # Territory cunt for player 2
+    __score_p1 = 0
+    __score_p2 = 0
+    __game_state = 0  # not playing
+    __final_board = None
+    __handicap_player = None
 
     def __init__(self, board: list[list[Piece]], handicaps):
         """
@@ -11,22 +26,31 @@ class GameLogic:
         """
         self.board = board  # saving the pointing to the board
         self.__top = len(board)  # getting the max index + 1
-        self.__ko_state = False  # ko state round before, init as false
-        self.__prisoners_p1 = 0  # Counter for Player 1's prisoners
-        self.__prisoners_p2 = 0  # Counter for Player 2's prisoners
-        self.__territory_p1 = 0  # Territory count for player 1
-        self.__territory_p2 = 0  # Territory cunt for player 2
-        self.__komi = handicaps["komi"]
-        self.__score_p1 = 0
-        self.__score_p2 = 0
-        self.__game_state = 0  # not playing
-        self.__final_board = None
+        self.__init_handicap(handicaps)
+
+    def __init_handicap(self, handicaps):
+        
+        self.__komi_p1 = float(handicaps["komi"])
+        self.__komi_p2 = 0
+
+        if handicaps["player"] != 0 and handicaps["type"]:
+            if handicaps["type"] == "Points" and handicaps["player"] == 1:
+                self.__komi_p1 += float(handicaps["value"])
+            elif handicaps["type"] == "Points" and handicaps["player"] == 2:
+                self.__komi_p2 += float(handicaps["value"])
+            elif handicaps["type"] == "Pieces":
+                self.__game_state = -1
+                self.__handicap_player = handicaps["player"]
+                self.handicap_pieces_left = int(handicaps["value"])
 
     def start(self):
         self.__game_state = 1
+        self.__count_prisoner = True
+        return self.__handicap_player
 
     def stop(self):
         self.__game_state = 0
+        self.__count_prisoner = False
 
     def game_state(self):
         return self.__game_state
@@ -230,9 +254,9 @@ class GameLogic:
                             captured_row, captured_col = captured_piece.position
                             captured_positions.append((captured_row, captured_col))
 
-                            if captured_piece.state == 1:
+                            if captured_piece.state == 1 and self.__count_prisoner:
                                 self.__prisoners_p2 += 1
-                            elif captured_piece.state == 2:
+                            elif captured_piece.state == 2 and self.__count_prisoner:
                                 self.__prisoners_p1 += 1
 
                             self.board[captured_row][captured_col].change_state(0)
@@ -296,8 +320,8 @@ class GameLogic:
         Counting point based on the Japanese go's rules (territory scoring)
         """
 
-        self.__score_p1 = self.__territory_p1 - self.__prisoners_p2 + self.__komi
-        self.__score_p2 = self.__territory_p2 - self.__prisoners_p1
+        self.__score_p1 = self.__territory_p1 - self.__prisoners_p2 + self.__komi_p1
+        self.__score_p2 = self.__territory_p2 - self.__prisoners_p1 + self.__komi_p2
 
         return self.__score_p1, self.__score_p2
 
@@ -306,8 +330,8 @@ class GameLogic:
         Scocring based on the Chinese rules (area scoring)
         """
 
-        self.__score_p1 = self.__territory_p1 + self.__komi
-        self.__score_p2 = self.__territory_p2
+        self.__score_p1 = self.__territory_p1 + self.__komi_p1
+        self.__score_p2 = self.__territory_p2 + self.__komi_p2
 
         for row in self.board:
             for piece in row:
@@ -323,6 +347,7 @@ class GameLogic:
         Implementation of the end game before territory scoring
         """
         self.__game_state = 2
+        self.__count_prisoner = True
 
         if self.__final_board:
             for row in range(self.__top):
@@ -355,9 +380,9 @@ class GameLogic:
             for captured_row, captured_col in selected_pieces:
 
                 if player_turn == 1:
-                    self.__prisoners_p2 += 1
-                elif player_turn == 2:
                     self.__prisoners_p1 += 1
+                elif player_turn == 2:
+                    self.__prisoners_p2 += 1
 
                 self.board[captured_row][captured_col].change_state(0)
 
@@ -400,3 +425,4 @@ class GameLogic:
     def dead_pieces_debate(self):
         self.__game_state = 1
         self.__final_board = deepcopy(self.board)
+        self.__count_prisoner = False

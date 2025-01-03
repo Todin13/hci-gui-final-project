@@ -14,10 +14,14 @@ from PyQt6.QtWidgets import (
 
 
 class HandicapDialog(QDialog):
+
+    player_index = {"White Player": 1, "Black Player":2, "None": 0}
+    index_to_player = {1: "White Player", 2: "Black Player", 0: "None"}
+
     def __init__(self, handicaps: dict):
         super().__init__()
         self.setWindowTitle("Choose Handicap and Komi")
-        self.selected_player = handicaps["player"]
+        self.selected_player = self.index_to_player[handicaps["player"]]
         self.selected_type = handicaps["type"]
         self.selected_value = handicaps["value"]
         self.selected_komi = handicaps["komi"]
@@ -33,7 +37,7 @@ class HandicapDialog(QDialog):
         player_layout = QHBoxLayout()
         self.player_label = QLabel("Select Player:")
         self.player_combo = QComboBox()
-        self.player_combo.addItems(["None", "Player 1", "Player 2"])
+        self.player_combo.addItems(["None", "White Player", "Black Player"])
         self.player_combo.currentTextChanged.connect(self.update_ui)
 
         player_layout.addWidget(self.player_label)
@@ -122,7 +126,7 @@ class HandicapDialog(QDialog):
     def get_results(self):
         """Return the selected handicap and Komi information."""
         return {
-            "player": self.selected_player,
+            "player": self.player_index[self.selected_player],
             "type": (
                 "Points"
                 if self.point_radio.isChecked()
