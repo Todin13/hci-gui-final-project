@@ -46,11 +46,18 @@ class ScoreBoard(QDockWidget):
         self.label_turn = QLabel("Turn: ")
 
         self.button_pass = QPushButton("Pass")
+
+        # Navigation buttons for pending moves
+        self.button_prev = QPushButton("Previous Move")
+        self.button_next = QPushButton("Next Move")
+
+        self.button_resign = QPushButton("Resign")
+        self.button_dispute_not_success = QPushButton("Dispute Not Succesful")
+        self.button_dispute_not_success.setVisible(False)
         self.button_reset = QPushButton("Reset Game")
+
         self.button_rules = QPushButton("Rules of Ko and Suicide")
         self.button_controls = QPushButton("Controls")
-        self.button_resign = QPushButton("Resign")
-        self.button_dispute_not_succes = QPushButton("Dispute Not Succesful")
 
         self.mainWidget.setLayout(self.mainLayout)
         self.mainLayout.addWidget(self.label_clickLocation)
@@ -73,26 +80,24 @@ class ScoreBoard(QDockWidget):
 
         self.mainLayout.addWidget(self.label_turn)
         self.mainLayout.addWidget(self.button_pass)
-        self.mainLayout.addWidget(self.button_reset)
-        self.mainLayout.addWidget(self.button_rules)
-        self.mainLayout.addWidget(self.button_controls)
-        self.mainLayout.addWidget(self.button_resign)
-        self.mainLayout.addWidget(self.button_dispute_not_succes)
-
-        self.setWidget(self.mainWidget)
-
-        self.button_rules.clicked.connect(self.showKoSuicideRules)
-        self.button_controls.clicked.connect(self.showControls)
-
-        # Navigation buttons for pending moves
-        self.button_prev = QPushButton("Previous Move")
-        self.button_next = QPushButton("Next Move")
 
         # Add navigation buttons
         navigationLayout = QHBoxLayout()
         navigationLayout.addWidget(self.button_prev)
         navigationLayout.addWidget(self.button_next)
         self.mainLayout.addLayout(navigationLayout)
+
+        self.mainLayout.addWidget(self.button_resign)
+        self.mainLayout.addWidget(self.button_dispute_not_success)
+        self.mainLayout.addWidget(self.button_reset)
+
+        self.mainLayout.addWidget(self.button_rules)
+        self.mainLayout.addWidget(self.button_controls)
+
+        self.setWidget(self.mainWidget)
+
+        self.button_rules.clicked.connect(self.showKoSuicideRules)
+        self.button_controls.clicked.connect(self.showControls)
 
     def make_connection(self, board):
         """This handles a signal sent from the board class"""
@@ -104,7 +109,7 @@ class ScoreBoard(QDockWidget):
         self.button_pass.clicked.connect(self.pass_turn)
         self.button_reset.clicked.connect(self.resetGameSignal.emit)
         self.button_resign.clicked.connect(self.resignSignal.emit)
-        self.button_dispute_not_succes.clicked.connect(self.disputeNotSuccessingSignal.emit)
+        self.button_dispute_not_success.clicked.connect(self.disputeNotSuccessingSignal.emit)
 
         # Connect navigation buttons to board methods
         self.button_prev.clicked.connect(self.board.PreviousPendingMove)

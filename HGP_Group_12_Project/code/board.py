@@ -402,6 +402,8 @@ class Board(QFrame):
         self.scoreBoard.updatePrisoners(0, 0)
         self.scoreBoard.updateTerritory(0, 0)
         self.scoreBoard.updateTurn(self.player_turn)
+        self.scoreBoard.button_resign.setVisible(True)
+        self.scoreBoard.button_dispute_not_success.setVisible(False)
 
     def start(self):
         self.resetGame()
@@ -548,6 +550,8 @@ class Board(QFrame):
 
         if self.conssecutive_passing_turn >= 2:
             if self.logic.game_state() == 1:
+                self.scoreBoard.button_dispute_not_success.setVisible(True)
+                self.scoreBoard.button_resign.setVisible(False)
                 self.conssecutive_passing_turn = 0
                 self.logic.end_game()
             elif self.logic.game_state() == 2:
