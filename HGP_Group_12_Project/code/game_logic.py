@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QMessageBox
 
 class GameLogic:
 
-    def __init__(self, board: list[list[Piece]], komi=6.5):
+    def __init__(self, board: list[list[Piece]], handicaps):
         """
         Init of game logic, komi is the point compensation given to white player as it's black who start here 6.5 as we follow japanese rules
         """
@@ -16,7 +16,7 @@ class GameLogic:
         self.__prisoners_p2 = 0  # Counter for Player 2's prisoners
         self.__territory_p1 = 0  # Territory count for player 1
         self.__territory_p2 = 0  # Territory cunt for player 2
-        self.__komi = komi
+        self.__komi = handicaps["komi"]
         self.__score_p1 = 0
         self.__score_p2 = 0
         self.__game_state = 0  # not playing
