@@ -274,7 +274,7 @@ class GameLogic:
         territory_p2 = 0
         visited = set()
 
-        if sum([sum([p.state for p in row]) for row in self.board]) < 3:
+        if sum([sum([p.state for p in row]) for row in self.board]) < 3 and self.__game_state == 1:
             return 0, 0
 
         for row in range(self.__top):
