@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import (
     QDialog,
     QMessageBox,
     QWidget,
-    QLabel,
     QHBoxLayout,
     QStackedWidget,
     QVBoxLayout,
@@ -20,13 +19,14 @@ import random
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int, int)
     clickLocationSignal = pyqtSignal(str)
-    resetGameSignal = pyqtSignal()  # Signal pour la réinitialisation du jeu
-    returnToMenuSignal = pyqtSignal()  # Nouveau signal pour retourner au menu
+    resetGameSignal = pyqtSignal()
+    returnToMenuSignal = pyqtSignal()
 
     boardWidth = 9  # 9x9 Goban
     boardHeight = 9
 
     gamemode = 0
+    winner = 0
 
     def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
@@ -392,7 +392,7 @@ class Board(QFrame):
         self.update()  # Redraw the board to reflect changes
 
         # After a short delay, slide pieces out of the board
-        self.capture_timer.start(700)  # 1 second delay before sliding out
+        self.capture_timer.start(700)  # 700ms second delay before sliding out
 
     def slideOutCapturedPieces(self):
         """Animate all captured pieces sliding out of the board over 0.5 seconds."""
@@ -419,11 +419,20 @@ class Board(QFrame):
     def drawCapturedPieces(self, painter):
         """Draw captured pieces at their current positions."""
         for captured in self.captured_pieces:
-            pixmap = (
-                self.white_stone_pixmap
-                if self.player_turn == 1
-                else self.black_stone_pixmap
-            )
+            if self.logic.game_state == 1:
+                pixmap = (
+                    self.white_stone_pixmap
+                    if self.player_turn == 1
+                    else self.black_stone_pixmap
+                )
+            else:
+                pixmap = (
+                    self.white_stone_pixmap
+                    if self.winner == 1
+                    else self.black_stone_pixmap
+                )
+            
+            
             if pixmap.isNull():
                 continue
 
@@ -435,6 +444,7 @@ class Board(QFrame):
 
     def resetGame(self):
         self.initBoard()
+        self.winner = 0
         self.player_turn = 2  # black start
         self.conssecutive_passing_turn = 0
         self.update()
@@ -647,42 +657,43 @@ class Board(QFrame):
         white_score, black_score = self.logic.territory_scoring()
 
         if white_score > black_score:
-            msg = QLabel(
+            msg = (
                 f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
             )
+            self.winner = 1
         elif black_score > white_score:
-            msg = QLabel(
+            msg = (
                 f"Black player win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
             )
+            self.winner = 2
         else:
             msg = "Equality"
 
-        game_over_window = QDialog(self)
-        game_over_window.setWindowTitle("Winner")
-        # game_over_window.setFixedSize(300, 200)
+        message_box = QMessageBox()
+        message_box.setWindowTitle("Game Over")
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setText(msg)
 
-        layout = QVBoxLayout()
-
-        layout.addWidget(msg)
-
-        # # Buttons layout
-        # buttons_layout = QVBoxLayout()
-
-        # return_menu_button = QPushButton("Return Menu")
-        # return_menu_button.clicked.connect(self.return_to_menu)
-        # buttons_layout.addWidget(return_menu_button)
-
-        # new_game_button = QPushButton("New Game")
-        # new_game_button.clicked.connect(self.start)
-        # buttons_layout.addWidget(new_game_button)
-
-        # layout.addLayout(buttons_layout)
-
-        game_over_window.setLayout(layout)
+        # Customize button text
+        yes_button = message_box.button(QMessageBox.StandardButton.Yes)
+        yes_button.setText("New Game")
+        no_button = message_box.button(QMessageBox.StandardButton.No)
+        no_button.setText("Menu")
 
         self.triggerFireworksAnimation()
 
-        game_over_window.exec()
+        # Show the message box and check the response
+        response = message_box.exec()
+
+        if response == QMessageBox.StandardButton.Yes:
+            QMessageBox.information(self, "New Game", "Launching new game process")
+            self.start()
+        elif response == QMessageBox.StandardButton.No:
+            self.scoreBoard.close()
+            self.returnToMenuSignal.emit()      
+
+
+
 
     def ask_handicap(self):
         """
@@ -700,27 +711,64 @@ class Board(QFrame):
                 "komi": "6.5",
             }
 
-    # def return_to_menu(self):
-    #     """Return to the main menu."""
-    #     self.returnToMenuSignal.emit()
-
     def resignGame(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
             return
         opponent = 3 - self.player_turn
         msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        self.triggerFireworksAnimation()
         self.logic.stop()
-        QMessageBox.information(self, "Game Over", msg)
+
+        self.winner = opponent
+
+        message_box = QMessageBox()
+        message_box.setWindowTitle("Game Over")
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setText(msg)
+
+        # Customize button text
+        yes_button = message_box.button(QMessageBox.StandardButton.Yes)
+        yes_button.setText("New Game")
+        no_button = message_box.button(QMessageBox.StandardButton.No)
+        no_button.setText("Menu")
+
+        self.triggerFireworksAnimation()
+
+        # Show the message box and check the response
+        response = message_box.exec()
+
+        if response == QMessageBox.StandardButton.Yes:
+            QMessageBox.information(self, "New Game", "Launching new game process")
+            self.start()
+        elif response == QMessageBox.StandardButton.No:
+            self.scoreBoard.close()
+            self.returnToMenuSignal.emit()        
+            
 
     def disputeNotSuccessing(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            QMessageBox.information(
-                self,
-                "Game Over",
-                "Both players lose because the dispute did not resolve.",
-            )
             self.logic.stop()
+            msg = "Both players lose because the dispute did not resolve."
+
+            message_box = QMessageBox()
+            message_box.setWindowTitle("Game Over")
+            message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            message_box.setText(msg)
+
+            # Customize button text
+            yes_button = message_box.button(QMessageBox.StandardButton.Yes)
+            yes_button.setText("New Game")
+            no_button = message_box.button(QMessageBox.StandardButton.No)
+            no_button.setText("Menu")
+
+            # Show the message box and check the response
+            response = message_box.exec()
+
+            if response == QMessageBox.StandardButton.Yes:
+                QMessageBox.information(self, "New Game", "Launching new game process")
+                self.start()
+            elif response == QMessageBox.StandardButton.No:
+                self.scoreBoard.close()
+                self.returnToMenuSignal.emit()        
 
     def triggerFireworksAnimation(self):
         firework_particles = []
@@ -731,22 +779,15 @@ class Board(QFrame):
             y = random.uniform(self.top_left_y, self.top_left_y + self.square_side)
             vx = random.uniform(-2, 2)  # Random velocity
             vy = random.uniform(-3, -1)  # Negative for upward motion
-            lifetime = random.uniform(100, 300)  # Lifespan in frames
-            color = QColor(
-                random.randint(0, 255),
-                random.randint(0, 255),
-                random.randint(0, 255),
-                255,
-            )
+            lifetime = random.uniform(200, 500)  # Lifespan in frames
 
             firework_particles.append(
-                {
+                {   
                     "x": x,
                     "y": y,
                     "vx": vx,
                     "vy": vy,
                     "lifetime": lifetime,
-                    "color": color,
                 }
             )
 
@@ -781,12 +822,31 @@ class Board(QFrame):
                     print("Game over for player 1")
                     self.logic.stop()
                     msg = "Black player win by timeout"
+                    
+                    self.winner = 1
+
                     message_box = QMessageBox()
                     message_box.setWindowTitle("Winner")
+                    message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                     message_box.setText(msg)
+
+                    # Customize button text
+                    yes_button = message_box.button(QMessageBox.StandardButton.Yes)
+                    yes_button.setText("New Game")
+                    no_button = message_box.button(QMessageBox.StandardButton.No)
+                    no_button.setText("Menu")
+
                     self.triggerFireworksAnimation()
 
-                    message_box.exec()
+                    # Show the message box and check the response
+                    response = message_box.exec()
+
+                    if response == QMessageBox.StandardButton.Yes:
+                        QMessageBox.information(self, "New Game", "Launching new game process")
+                        self.start()
+                    elif response == QMessageBox.StandardButton.No:
+                        self.scoreBoard.close()
+                        self.returnToMenuSignal.emit()
                     return
 
                 self.player_1_remaining_time -= 1
@@ -797,12 +857,31 @@ class Board(QFrame):
                     print("Game over for player 2")
                     self.logic.stop()
                     msg = "White player win by timeout"
+                    
+                    self.winner = 2
+
                     message_box = QMessageBox()
                     message_box.setWindowTitle("Winner")
+                    message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                     message_box.setText(msg)
+
+                    # Customize button text
+                    yes_button = message_box.button(QMessageBox.StandardButton.Yes)
+                    yes_button.setText("New Game")
+                    no_button = message_box.button(QMessageBox.StandardButton.No)
+                    no_button.setText("Menu")
+
                     self.triggerFireworksAnimation()
 
-                    message_box.exec()
+                    # Show the message box and check the response
+                    response = message_box.exec()
+
+                    if response == QMessageBox.StandardButton.Yes:
+                        QMessageBox.information(self, "New Game", "Launching new game process")
+                        self.start()
+                    elif response == QMessageBox.StandardButton.No:
+                        self.scoreBoard.close()
+                        self.returnToMenuSignal.emit()
                     return
 
                 self.player_2_remaining_time -= 1

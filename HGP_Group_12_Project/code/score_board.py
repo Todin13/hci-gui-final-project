@@ -24,7 +24,6 @@ class ScoreBoard(QDockWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.pass_count = 0  # Counter for consecutive passes
         self.last_player_passed = None  # Track the last player who passed
         self.board = None  # Attribute to store the Board object
         self.gamemode = 0  # 0 for normal game, 1 for blitz game
@@ -176,7 +175,6 @@ class ScoreBoard(QDockWidget):
         self.label_turn.setText(f"Turn: Player {player_turn} ({color}) to play")
 
     def pass_turn(self):
-        self.pass_count += 1
         self.passTurnSignal.emit()
 
     def showKoSuicideRules(self):
