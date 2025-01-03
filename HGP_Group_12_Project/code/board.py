@@ -16,7 +16,7 @@ class Board(QFrame):
 
     def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
-        self.margin = 40
+        self.margin = 50
         self.scoreBoard = scoreBoard  # Store the scoreBoard reference
         self.pending_moves = []  # List to track all pending moves
         self.current_pending_index = -1  # Index of the currently viewed pending move
@@ -497,7 +497,7 @@ class Board(QFrame):
         print(f"Player {self.player_turn} ({color}) turn")
 
     def sizeHint(self):
-        return QSize(800, 800)
+        return QSize(1100, 800)
 
     def update_turn(self, pass_turn=False):
 
