@@ -103,8 +103,8 @@ class Board(QFrame):
         # Draw captured pieces
         self.drawCapturedPieces(painter)
 
-        #if hasattr(self, "highlight_positions") and self.highlight_positions:
-         #   self.highlightPieces(painter, self.highlight_positions)
+        # if hasattr(self, "highlight_positions") and self.highlight_positions:
+        #   self.highlightPieces(painter, self.highlight_positions)
         self.highlightPieces(painter)
 
     def drawBackground(self, painter):

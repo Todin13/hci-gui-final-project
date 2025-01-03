@@ -13,6 +13,36 @@ class Go(QMainWindow):
 
     def initUI(self):
         """Initiates application UI"""
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #2e2e2e; /* Dark background color */
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                color: #2e2e2e; /* Light gray text for contrast */
+            }
+            QLabel {
+                font-size: 20px;
+                font-weight: bold;
+                color: #ffffff; /* White text for labels */
+            }
+            QPushButton {
+                background-color: #8B4513; /* Wooden brown color */
+                color: #ffffff; /* White text */
+                font-size: 16px;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #A0522D; /* Lighter brown on hover */
+            }
+            QPushButton:pressed {
+                background-color: #6A3918; /* Darker brown when pressed */
+            }
+            """
+        )
+
         self.stackedWidget = QStackedWidget()
         self.setCentralWidget(self.stackedWidget)
 
