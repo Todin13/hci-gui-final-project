@@ -439,3 +439,18 @@ class GameLogic:
         message_box.setWindowTitle("Dispute mode")
         message_box.setText("Starting the dispute mode.")
         message_box.exec()
+
+    def resignGame(self):
+        if self.game_state() == 2 or self.game_state() == 3:
+            return
+        opponent = 3 - self.player_turn
+        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
+        QMessageBox.information(self, "Game Over", msg)
+        self.stop()
+        self.start()
+
+    def disputeNotAbout(self):
+        if self.game_state() == 2 or self.game_state() == 3:
+            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
+            self.stop()
+            self.start()

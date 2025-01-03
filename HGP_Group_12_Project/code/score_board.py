@@ -15,6 +15,8 @@ class ScoreBoard(QDockWidget):
     passTurnSignal = pyqtSignal()
     resetGameSignal = pyqtSignal()
     endGameSignal = pyqtSignal(int)  # Signal to end the game with the winner's player number
+    resignSignal = pyqtSignal(int)
+    disputeNotAboutSignal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -47,6 +49,9 @@ class ScoreBoard(QDockWidget):
         self.button_reset = QPushButton("Reset Game")
         self.button_rules = QPushButton("Rules of Ko and Suicide")
         self.button_controls = QPushButton("Controls")
+        self.button_resign = QPushButton("Resign")
+        self.button_dispute_not_about = QPushButton("Dispute Not About")
+        self.button_dispute_not_about.setVisible(False)  # Hide the button initially
 
         self.mainWidget.setLayout(self.mainLayout)
         self.mainLayout.addWidget(self.label_clickLocation)
@@ -72,6 +77,8 @@ class ScoreBoard(QDockWidget):
         self.mainLayout.addWidget(self.button_reset)
         self.mainLayout.addWidget(self.button_rules)
         self.mainLayout.addWidget(self.button_controls)
+        self.mainLayout.addWidget(self.button_resign)
+        self.mainLayout.addWidget(self.button_dispute_not_about)
 
         self.setWidget(self.mainWidget)
 
@@ -97,6 +104,8 @@ class ScoreBoard(QDockWidget):
         board.updateTimerSignal.connect(self.setTimeRemaining)
         self.button_pass.clicked.connect(self.pass_turn)
         self.button_reset.clicked.connect(self.resetGameSignal.emit)
+        self.button_resign.clicked.connect(self.resignSignal.emit)
+        self.button_dispute_not_about.clicked.connect(self.disputeNotAboutSignal.emit)
 
         # Connect navigation buttons to board methods
         self.button_prev.clicked.connect(self.board.PreviousPendingMove)
@@ -131,13 +140,19 @@ class ScoreBoard(QDockWidget):
         self.label_turn.setText(f"Turn: Player {player_turn} ({color}) to play")
 
     def pass_turn(self):
+        self.pass_count += 1
+        if self.pass_count >= 2:
+            QMessageBox.information(self, "Dispute not about situation", "Dispute not about situation")
+            self.button_dispute_not_about.setVisible(True)  # Show the button
+            self.pass_count = 0  # Reset the pass count
+        else:
+            self.button_dispute_not_about.setVisible(False)  # Hide the button if not two consecutive passes
         self.passTurnSignal.emit()
 
     def showKoSuicideRules(self):
         rules = (
-            'Rules of Ko and Suicide in Go:\n'
-            '1. Ko Rule: A player cannot play a move that returns the board to the exact same position as it was after the previous move.\n\n'
-            '2. Suicide Rule: A player cannot play a move that results in the immediate capture of their own stone(s) unless it also results in the capture of one or more of the opponent\'s stones.\n'
+            '1. Ko Rule:\nThe Ko rule prohibits a player from making a move that would return the game to a position identical to one that occurred earlier in the game. This prevents infinite captures and recaptures of the same stone. For example, if a player captures an opponent\'s stone, the opponent cannot immediately recapture that stone; they must play elsewhere before they can come back to capture the stone. This rule is crucial to avoid infinite repetition situations, known as "ko fights".\n\n'
+            '2. Suicide Rule:\nThe Suicide rule states that a player cannot place a stone in a position where it would have no liberties, unless that move captures opponent\'s stones. A liberty is an adjacent intersection to a stone that is not occupied by an opponent\'s stone. If a group of stones has no liberties, it is captured and removed from the board. This rule prevents players from placing stones in positions where they would be immediately captured without strategic benefit.'
         )
         QMessageBox.information(self, "Rules of Ko and Suicide", rules)
 
@@ -148,9 +163,15 @@ class ScoreBoard(QDockWidget):
     def showControls(self):
         controls = (
             '- Click on a free space to add a temporary Stone.\n\n'
-            '- Click again on the current temporary Stone or press "Enter" to confirm the move.\n\n'
+            '- Click again on the current temporary Stone to confirm the move.\n\n'
             '- Press Left arrow or Right arrow to navigate through your temporary Stones\n\n\n'
             '- Click on "Pass" to pass your turn.\nReminder: 2 passes = end of game\n\n'
             '- Click on "Reset Game" to clear the board and restart.'
         )
         QMessageBox.information(self, "Controls", controls)
+
+    def resign(self):
+        self.resignSignal.emit(self.board.player_turn)
+
+    def disputeNotAbout(self):
+        self.disputeNotAboutSignal.emit()

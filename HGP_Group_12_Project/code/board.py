@@ -11,6 +11,7 @@ import random
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
+    resetGameSignal = pyqtSignal()  # Signal pour la réinitialisation du jeu
 
     boardWidth = 9  # 9x9 Goban
     boardHeight = 9
@@ -61,6 +62,8 @@ class Board(QFrame):
         self.ask_handicap()
         self.logic = GameLogic(self.boardArray, self.handicap)
         self.printBoardArray()
+        self.player_turn = 2  # black starts
+        self.conssecutive_passing_turn = 0
 
     def printBoardArray(self):
         """Prints the boardArray for debugging."""
@@ -186,6 +189,7 @@ class Board(QFrame):
 
                 else:
                     self.logic.dead_pieces_debate()
+
 
     def PreviousPendingMove(self):
         """Go to the previous pending move."""
@@ -392,6 +396,9 @@ class Board(QFrame):
         self.player_turn = 2  # black start
         self.conssecutive_passing_turn = 0
         self.update()
+        self.scoreBoard.updatePrisoners(0, 0)
+        self.scoreBoard.updateTerritory(0, 0)
+        self.scoreBoard.updateTurn(self.player_turn)
 
     def start(self):
         self.resetGame()
@@ -590,7 +597,7 @@ class Board(QFrame):
         if white_score > black_score:
             msg = f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
         elif black_score > white_score:
-            msg = f"Black palyer win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+            msg = f"Black player win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
         else:
             msg = "Equality"
 
@@ -601,6 +608,39 @@ class Board(QFrame):
         message_box.exec()
 
         self.triggerFireworksAnimation()
+
+    def resignGame(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            return
+        opponent = 3 - self.player_turn
+        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
+        QMessageBox.information(self, "Game Over", msg)
+        self.logic.stop()
+        self.start()
+
+    def disputeNotAbout(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
+            self.logic.stop()
+            self.start()
+
+        self.resetGame()  # Assurez-vous que le jeu est réinitialisé à la fin
+
+    def resignGame(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            return
+        opponent = 3 - self.player_turn
+        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
+        QMessageBox.information(self, "Game Over", msg)
+        self.logic.stop()
+        self.start()
+
+    def disputeNotAbout(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
+            self.logic.stop()
+            self.start()
+
 
     def ask_handicap(self):
         """
