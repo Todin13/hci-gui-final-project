@@ -1,10 +1,9 @@
-from PyQt6.QtWidgets import QFrame, QDialog
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
+from PyQt6.QtWidgets import QFrame, QDialog, QMessageBox
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
 from copy import deepcopy
-from PyQt6.QtWidgets import QMessageBox
 from handicap import HandicapDialog
 
 
