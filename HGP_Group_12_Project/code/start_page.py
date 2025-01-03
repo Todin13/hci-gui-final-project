@@ -9,7 +9,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QSize
 
-
 class StartPage(QWidget):
     newGameSignal = pyqtSignal()
 
@@ -65,11 +64,11 @@ class StartPage(QWidget):
             '1. Go is a territory control game between "Black" and "White".\n\n'
             "2. Go is played on a Goban, a squared board, here 9x9.\n\n"
             '3. Every turn, Black or White places a "Stone" in a free intersection on the board.\n\n'
-            "4. Totally surrounding an opponnent' stone or group of stones will have those captured.\n\n"
-            "5. The winner is decided by however has the most captured stones and free intersections surrounded by their own stones.\n\n"
-            "6. The game is over when both player passes their turn.\n"
+            "4. Totally surrounding an opponent' stone or group of stones will have those captured.\n\n"
+            "5. The winner is decided by whoever has the most captured stones and free intersections surrounded by their own stones.\n\n"
+            "6. The game is over when both players pass their turn.\n"
         )
         QMessageBox.information(self, "Rules of Go", rules)
 
     def sizeHint(self):
-        return QSize(400, 200)  # Define a prefered size for the window
+        return QSize(400, 200)  # Define a preferred size for the window

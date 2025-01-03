@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QFrame, QDialog, QMessageBox
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
-from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
+from PyQt6.QtWidgets import QFrame, QDialog,  QMessageBox, QWidget, QLabel, QHBoxLayout, QStackedWidget
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
+from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap, QKeyEvent
 from piece import Piece
 from game_logic import GameLogic
 from copy import deepcopy
@@ -11,6 +11,8 @@ import random
 class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
+    resetGameSignal = pyqtSignal()  # Signal pour la réinitialisation du jeu
+    returnToMenuSignal = pyqtSignal()  # Nouveau signal pour retourner au menu
 
     boardWidth = 9  # 9x9 Goban
     boardHeight = 9
@@ -50,6 +52,9 @@ class Board(QFrame):
         )
         self.setMouseTracking(True)  # Enable mouse tracking
 
+        self.pending_move = None  # Store the pending move
+        self.clicked_position = None  # Store the clicked position
+
         self.handicap = {"player": 0, "type": None, "value": None, "komi": "6.5"}
 
     def initBoard(self):
@@ -61,6 +66,8 @@ class Board(QFrame):
         self.ask_handicap()
         self.logic = GameLogic(self.boardArray, self.handicap)
         self.printBoardArray()
+        self.player_turn = 2  # black starts
+        self.conssecutive_passing_turn = 0
 
     def printBoardArray(self):
         """Prints the boardArray for debugging."""
@@ -187,6 +194,7 @@ class Board(QFrame):
                 else:
                     self.logic.dead_pieces_debate()
 
+
     def PreviousPendingMove(self):
         """Go to the previous pending move."""
         if not self.pending_moves:
@@ -232,6 +240,7 @@ class Board(QFrame):
 
         self.update_turn()
 
+    
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
         if self.logic.game_state() == 1:
@@ -272,6 +281,34 @@ class Board(QFrame):
 
         center_x = self.top_left_x + self.hover_col * square_width
         center_y = self.top_left_y + self.hover_row * square_height
+        size = min(square_width, square_height) * 0.9
+
+        self.transparent_piece_color = self.player_turn
+
+        pixmap = (
+            self.white_stone_pixmap
+            if self.transparent_piece_color == 1
+            else self.black_stone_pixmap
+        )
+
+        x = center_x - size / 2
+        y = center_y - size / 2
+
+        painter.setOpacity(0.5)  # Semi-transparent effect
+        painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
+        painter.setOpacity(1.0)  # Reset opacity to normal
+
+    def drawClickedPiece(self, painter):
+        """Draw the clicked piece at the clicked position."""
+        if self.clicked_position is None:
+            return
+
+        row, col = self.clicked_position
+        square_width = self.square_side / (self.boardWidth - 1)
+        square_height = self.square_side / (self.boardHeight - 1)
+
+        center_x = self.top_left_x + col * square_width
+        center_y = self.top_left_y + row * square_height
         size = min(square_width, square_height) * 0.9
 
         self.transparent_piece_color = self.player_turn
@@ -363,6 +400,11 @@ class Board(QFrame):
         self.player_turn = 2  # black start
         self.conssecutive_passing_turn = 0
         self.update()
+        self.scoreBoard.updatePrisoners(0, 0)
+        self.scoreBoard.updateTerritory(0, 0)
+        self.scoreBoard.updateTurn(self.player_turn)
+        self.scoreBoard.button_resign.setVisible(True)
+        self.scoreBoard.button_dispute_not_success.setVisible(False)
 
     def start(self):
         self.resetGame()
@@ -509,6 +551,8 @@ class Board(QFrame):
 
         if self.conssecutive_passing_turn >= 2:
             if self.logic.game_state() == 1:
+                self.scoreBoard.button_dispute_not_success.setVisible(True)
+                self.scoreBoard.button_resign.setVisible(False)
                 self.conssecutive_passing_turn = 0
                 self.logic.end_game()
             elif self.logic.game_state() == 2:
@@ -559,19 +603,35 @@ class Board(QFrame):
         white_score, black_score = self.logic.territory_scoring()
 
         if white_score > black_score:
-            msg = f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+            msg = QLabel(f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}")
         elif black_score > white_score:
-            msg = f"Black palyer win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+            msg = QLabel(f"Black player win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}")
         else:
             msg = "Equality"
 
-        message_box = QMessageBox()
-        message_box.setWindowTitle("Winner")
-        message_box.setText(msg)
+        game_over_window = QDialog(self)
+        game_over_window.setWindowTitle("Winner")
+        # game_over_window.setFixedSize(300, 200)
 
-        message_box.exec()
+        layout = QVBoxLayout()
 
-        self.triggerFireworksAnimation()
+        layout.addWidget(msg)
+
+        # # Buttons layout
+        # buttons_layout = QVBoxLayout()
+
+        # return_menu_button = QPushButton("Return Menu")
+        # return_menu_button.clicked.connect(self.return_to_menu)
+        # buttons_layout.addWidget(return_menu_button)
+
+        # new_game_button = QPushButton("New Game")
+        # new_game_button.clicked.connect(self.start)
+        # buttons_layout.addWidget(new_game_button)
+
+        # layout.addLayout(buttons_layout)
+
+        game_over_window.setLayout(layout)
+        game_over_window.exec()
 
     def ask_handicap(self):
         """
@@ -588,6 +648,44 @@ class Board(QFrame):
                 "value": None,
                 "komi": "6.5",
             }
+
+    # def return_to_menu(self):
+    #     """Return to the main menu."""
+    #     self.returnToMenuSignal.emit()
+
+    def resignGame(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            return
+        opponent = 3 - self.player_turn
+        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
+        QMessageBox.information(self, "Game Over", msg)
+        self.logic.stop()
+
+    def disputeNotSuccessing(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
+            self.logic.stop()
+            self.start()
+
+
+    def ask_handicap(self):
+        """
+        Aking box to choose handicaps
+        """
+
+        dialog = HandicapDialog(self.handicap)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.handicap = dialog.get_results()
+        else:
+            self.handicap = {
+                "player": 0,
+                "type": None,
+                "value": None,
+                "komi": "6.5",
+            }
+    def return_to_menu(self):
+        """Return to the main menu."""
+        self.returnToMenuSignal.emit()
 
     def triggerFireworksAnimation(self):
         firework_particles = []
@@ -625,3 +723,18 @@ class Board(QFrame):
         self.fireworks_timer = QTimer(self)
         self.fireworks_timer.timeout.connect(animateFireworks)
         self.fireworks_timer.start(10) 
+
+    def resignGame(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            return
+        opponent = 3 - self.player_turn
+        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
+        QMessageBox.information(self, "Game Over", msg)
+        self.logic.stop()
+        self.start()
+
+    def disputeNotSuccessing(self):
+        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
+            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
+            self.logic.stop()
+            self.start()

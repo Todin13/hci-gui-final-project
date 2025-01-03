@@ -1,10 +1,9 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox, QVBoxLayout, QWidget, QPushButton
 from PyQt6.QtCore import Qt, QSize
 from board import Board
 from score_board import ScoreBoard
 from start_page import StartPage
 from player_names_page import PlayerNamesPage
-
 
 class Go(QMainWindow):
     def __init__(self):
@@ -29,6 +28,12 @@ class Go(QMainWindow):
         self.startPage.newGameSignal.connect(self.showPlayerNamesPage)
         self.playerNamesPage.startGameSignal.connect(self.startGame)
 
+        self.board.resetGameSignal.connect(self.resetGame)  # Connecter le signal de réinitialisation
+        self.scoreBoard.resetGameSignal.connect(self.resetGame)  # Connecter le signal de réinitialisation
+        self.scoreBoard.resignSignal.connect(self.confirmResign)  # Connecter le signal de résignation
+        self.scoreBoard.disputeNotSuccessingSignal.connect(self.confirmDisputeNotSuccessful)  # Connecter le signal de dispute
+        # self.board.returnToMenuSignal.connect(self.showStartPage)  # Connecter le signal pour retourner au menu
+
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()
         self.setWindowTitle("Go game")
@@ -52,14 +57,24 @@ class Go(QMainWindow):
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
 
-    def startGame(self, player1, player2):
-        self.stackedWidget.setCurrentWidget(self.board)
-        self.board.start()
-        self.scoreBoard.make_connection(self.board)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
-        self.scoreBoard.passTurnSignal.connect(self.pass_turn)
-        self.scoreBoard.resetGameSignal.connect(self.resetGame)
-        print(f"Game started with players: {player1} vs {player2}")
+    def startGame(self, player1=None, player2=None):
+        if player1 and player2:
+            self.stackedWidget.setCurrentWidget(self.board)
+            self.board.start()
+            self.scoreBoard.make_connection(self.board)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
+            self.scoreBoard.passTurnSignal.connect(self.pass_turn)
+            self.scoreBoard.updatePlayerNames(player1, player2)  # Update player names
+            print(f"Game started with players: {player1} vs {player2}")
+        else:
+            self.stackedWidget.setCurrentWidget(self.board)
+            self.board.start()
+            self.scoreBoard.make_connection(self.board)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
+            self.scoreBoard.passTurnSignal.connect(self.pass_turn)
+            self.scoreBoard.updatePlayerNames("Player 1", "Player 2")  # Update player names
+            print("New game started")
+
         self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
         self.center()  # Centre la fenêtre
 
@@ -72,6 +87,31 @@ class Go(QMainWindow):
         self.scoreBoard.updatePrisoners(0, 0)
         self.scoreBoard.updateTerritory(0, 0)
         self.scoreBoard.updateTurn(self.board.player_turn)
+
+    def confirmResign(self):
+        reply = QMessageBox.question(self, 'Confirm Resign', 'Are you sure you want to resign?',
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                     QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.Yes:
+            self.resignGame()
+
+    def confirmDisputeNotSuccessful(self):
+        reply = QMessageBox.question(self, 'Confirm Dispute Not Successful', 'Are you sure you want to select : Dispute not successful?',
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                     QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.Yes:
+            self.disputeNotSuccessing()
+
+    # def showStartPage(self):
+    #     self.stackedWidget.setCurrentWidget(self.startPage)
+    #     self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
+    #     self.center()  # Centre la fenêtre
+
+    def resignGame(self):
+        self.board.resignGame()
+
+    def disputeNotSuccessing(self):
+        self.board.disputeNotSuccessing()
 
     def resizeEvent(self, event):
         """Adjust the size of the window based on the current page"""
