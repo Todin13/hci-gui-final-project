@@ -21,6 +21,7 @@ class Board(QFrame):
         self.scoreBoard = scoreBoard  # Store the scoreBoard reference
         self.pending_moves = []  # List to track all pending moves
         self.current_pending_index = -1  # Index of the currently viewed pending move
+        self.positions = []
 
         # Load assets
         self.background_pixmap = QPixmap(
@@ -102,8 +103,9 @@ class Board(QFrame):
         # Draw captured pieces
         self.drawCapturedPieces(painter)
 
-        if hasattr(self, "highlight_positions") and self.highlight_positions:
-            self.highlightPieces(painter, self.highlight_positions)
+        #if hasattr(self, "highlight_positions") and self.highlight_positions:
+         #   self.highlightPieces(painter, self.highlight_positions)
+        self.highlightPieces(painter)
 
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
@@ -168,7 +170,7 @@ class Board(QFrame):
                 )
 
                 # TODO implement glowing piece like surround them in blue ?
-                self.triggerHighlight(neighbor_pieces_positions)
+                self.positions = neighbor_pieces_positions
 
                 captured_positions = self.logic.remove_dead_pieces_box(
                     self.player_turn, neighbor_pieces_positions
@@ -176,6 +178,7 @@ class Board(QFrame):
 
                 if captured_positions:
                     self.setMouseTracking(False)
+                    self.positions = []
                     self.handleCapturedPieces(captured_positions)
                     self.setMouseTracking(True)
 
@@ -442,13 +445,13 @@ class Board(QFrame):
             painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
             painter.setOpacity(1.0)  # Reset opacity
 
-    def triggerHighlight(self, positions):
+    def triggerHighlight(self):
         """Trigger a new paint event specifically for highlighting."""
-        self.highlight_positions = positions
+        self.highlight_positions = self.positions
         self.repaint()
         self.highlight_positions = None
 
-    def highlightPieces(self, painter, positions):
+    def highlightPieces(self, painter):
         """Highlight pieces at the given list of (row, col) positions."""
         square_width = self.square_side / (self.boardWidth - 1)
         square_height = self.square_side / (self.boardHeight - 1)
@@ -458,7 +461,7 @@ class Board(QFrame):
         painter.setBrush(brush)
         painter.setPen(Qt.PenStyle.NoPen)
 
-        for row, col in positions:
+        for row, col in self.positions:
             # Calculate the center of the intersection
             center_x = self.top_left_x + col * square_width
             center_y = self.top_left_y + row * square_height
