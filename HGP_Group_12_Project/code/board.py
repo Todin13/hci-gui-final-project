@@ -1,11 +1,11 @@
-from PyQt6.QtWidgets import QFrame, QDialog
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
+from PyQt6.QtWidgets import QFrame, QDialog, QMessageBox
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap
 from piece import Piece
 from game_logic import GameLogic
 from copy import deepcopy
-from PyQt6.QtWidgets import QMessageBox
 from handicap import HandicapDialog
+import random
 
 
 class Board(QFrame):
@@ -17,10 +17,11 @@ class Board(QFrame):
 
     def __init__(self, parent=None, scoreBoard=None):
         super().__init__(parent)
-        self.margin = 40
+        self.margin = 50
         self.scoreBoard = scoreBoard  # Store the scoreBoard reference
         self.pending_moves = []  # List to track all pending moves
         self.current_pending_index = -1  # Index of the currently viewed pending move
+        self.positions = []
 
         # Load assets
         self.background_pixmap = QPixmap(
@@ -102,8 +103,9 @@ class Board(QFrame):
         # Draw captured pieces
         self.drawCapturedPieces(painter)
 
-        if hasattr(self, "highlight_positions") and self.highlight_positions:
-            self.highlightPieces(painter, self.highlight_positions)
+        # if hasattr(self, "highlight_positions") and self.highlight_positions:
+        #   self.highlightPieces(painter, self.highlight_positions)
+        self.highlightPieces(painter)
 
     def drawBackground(self, painter):
         """Draw the background image covering the entire widget."""
@@ -168,7 +170,7 @@ class Board(QFrame):
                 )
 
                 # TODO implement glowing piece like surround them in blue ?
-                self.triggerHighlight(neighbor_pieces_positions)
+                self.positions = neighbor_pieces_positions
 
                 captured_positions = self.logic.remove_dead_pieces_box(
                     self.player_turn, neighbor_pieces_positions
@@ -176,6 +178,7 @@ class Board(QFrame):
 
                 if captured_positions:
                     self.setMouseTracking(False)
+                    self.positions = []
                     self.handleCapturedPieces(captured_positions)
                     self.setMouseTracking(True)
 
@@ -442,13 +445,13 @@ class Board(QFrame):
             painter.drawPixmap(int(x), int(y), int(size), int(size), pixmap)
             painter.setOpacity(1.0)  # Reset opacity
 
-    def triggerHighlight(self, positions):
+    def triggerHighlight(self):
         """Trigger a new paint event specifically for highlighting."""
-        self.highlight_positions = positions
+        self.highlight_positions = self.positions
         self.repaint()
         self.highlight_positions = None
 
-    def highlightPieces(self, painter, positions):
+    def highlightPieces(self, painter):
         """Highlight pieces at the given list of (row, col) positions."""
         square_width = self.square_side / (self.boardWidth - 1)
         square_height = self.square_side / (self.boardHeight - 1)
@@ -458,7 +461,7 @@ class Board(QFrame):
         painter.setBrush(brush)
         painter.setPen(Qt.PenStyle.NoPen)
 
-        for row, col in positions:
+        for row, col in self.positions:
             # Calculate the center of the intersection
             center_x = self.top_left_x + col * square_width
             center_y = self.top_left_y + row * square_height
@@ -495,7 +498,7 @@ class Board(QFrame):
         print(f"Player {self.player_turn} ({color}) turn")
 
     def sizeHint(self):
-        return QSize(800, 800)
+        return QSize(950, 800)
 
     def update_turn(self, pass_turn=False):
 
@@ -568,6 +571,8 @@ class Board(QFrame):
 
         message_box.exec()
 
+        self.triggerFireworksAnimation()
+
     def ask_handicap(self):
         """
         Aking box to choose handicaps
@@ -583,3 +588,40 @@ class Board(QFrame):
                 "value": None,
                 "komi": "6.5",
             }
+
+    def triggerFireworksAnimation(self):
+        firework_particles = []
+
+        # Initialize firework particles
+        for _ in range(50):  # Number of particles
+            x = random.uniform(self.top_left_x, self.top_left_x + self.square_side)
+            y = random.uniform(self.top_left_y, self.top_left_y + self.square_side)
+            vx = random.uniform(-2, 2)  # Random velocity
+            vy = random.uniform(-3, -1)  # Negative for upward motion
+            lifetime = random.uniform(100, 300)  # Lifespan in frames
+            color = QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255), 255)
+
+            firework_particles.append({
+                'x': x, 'y': y, 'vx': vx, 'vy': vy, 'lifetime': lifetime, 'color': color
+            })
+
+        # Animate fireworks
+        def animateFireworks():
+            for particle in firework_particles:
+                particle['x'] += particle['vx']
+                particle['y'] += particle['vy']
+                particle['vy'] -= 0.05  # Gravity effect
+                particle['lifetime'] -= 1
+
+            self.update()  # Update the board for each frame
+
+            # Remove dead particles
+            self.captured_pieces = [p for p in firework_particles if p['lifetime'] > 0]
+
+            if not self.captured_pieces:
+                self.fireworks_timer.stop()
+
+        # Set up a timer for the fireworks animation
+        self.fireworks_timer = QTimer(self)
+        self.fireworks_timer.timeout.connect(animateFireworks)
+        self.fireworks_timer.start(10) 

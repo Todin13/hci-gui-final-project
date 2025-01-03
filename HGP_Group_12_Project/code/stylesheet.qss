@@ -1,0 +1,95 @@
+/* General Widget Style */
+QWidget {
+    background-color: #2e2e2e; /* Dark background color */
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #d3d3d3; /* Light gray text for contrast */
+}
+
+/* QLabel Style */
+QLabel {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff; /* White text for labels */
+}
+
+/* QPushButton Style */
+QPushButton {
+    background-color: #8B4513; /* Wooden brown color */
+    color: #ffffff; /* White text */
+    font-size: 16px;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+QPushButton:hover {
+    background-color: #A0522D; /* Lighter brown on hover */
+}
+
+QPushButton:pressed {
+    background-color: #6A3918; /* Darker brown when pressed */
+}
+
+/* QMessageBox Style */
+QMessageBox {
+    background-color: #2e2e2e; /* Match dark background */
+    color: #d3d3d3; /* Light gray text for message box */
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border: 1px solid #555555; /* Optional border for clarity */
+}
+
+QMessageBox QLabel {
+    font-size: 16px;
+    font-weight: normal;
+    color: #ffffff; /* White text for the message */
+}
+
+QMessageBox QPushButton {
+    background-color: #8B4513; /* Wooden brown for buttons */
+    color: #ffffff;
+    font-size: 14px;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #A0522D; /* Lighter brown on hover */
+}
+
+QMessageBox QPushButton:pressed {
+    background-color: #6A3918; /* Darker brown when pressed */
+}
+
+/* ComboBox Style */
+QComboBox {
+    background-color: #222222;
+    color: #ffffff; /* White text for ComboBox */
+    border: 1px solid #555555;
+    border-radius: 3px;
+    padding: 2px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #333333;
+    color: #ffffff; /* White text for combo box items */
+}
+
+/* RadioButton Style */
+QRadioButton {
+    color: #ffffff; /* White text for RadioButton */
+}
+
+QRadioButton::indicator {
+    width: 13px;
+    height: 13px;
+    background-color: #333333;
+    border: 1px solid #555555;
+    border-radius: 2px;
+}
+
+QRadioButton::indicator:checked {
+    background-color: #555555;
+}

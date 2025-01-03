@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QMessageBox,
+    QDoubleSpinBox
 )
 
 
@@ -28,7 +29,7 @@ class HandicapDialog(QDialog):
 
         self.init_ui()
 
-        self.setFixedSize(300, 200)
+        self.setFixedSize(400, 200)
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -71,11 +72,13 @@ class HandicapDialog(QDialog):
         self.handicap_layout.addWidget(self.point_radio)
         self.handicap_layout.addWidget(self.piece_radio)
 
-        # Combo box for entering handicap value
+        # QLineEdit for custom value input
         self.value_label = QLabel("Select Value:")
-        self.value_input = QComboBox()
+        self.spin_box = QDoubleSpinBox()  # You can use QSpinBox for integer values
+        self.spin_box.setDecimals(1)  # Optional, for decimal handling
+
         self.handicap_layout.addWidget(self.value_label)
-        self.handicap_layout.addWidget(self.value_input)
+        self.handicap_layout.addWidget(self.spin_box)
 
         layout.addLayout(self.handicap_layout)
 
@@ -91,6 +94,7 @@ class HandicapDialog(QDialog):
         self.setLayout(layout)
         self.update_ui("None")  # Initialize UI state
 
+
     def update_ui(self, player):
         """Update UI based on player selection."""
         self.selected_player = player
@@ -99,25 +103,28 @@ class HandicapDialog(QDialog):
             self.point_radio.setEnabled(False)
             self.piece_radio.setEnabled(False)
             self.value_label.setEnabled(False)
-            self.value_input.setEnabled(False)
+            self.spin_box.setEnabled(False)
         else:
             self.point_radio.setEnabled(True)
             self.piece_radio.setEnabled(True)
+            self.spin_box.setEnabled(False)
             self.update_value_input()  # Update input visibility based on selection
 
     def update_value_input(self):
         """Update the value input based on the selected handicap type."""
-        self.value_input.clear()
         if self.point_radio.isChecked():
-            self.values = [f"{x * 0.5}" for x in range(31)]
+            self.spin_box.setMaximum(15)
+            self.spin_box.setSingleStep(0.5)
+            self.spin_box.setValue(0.0)
         elif self.piece_radio.isChecked():
-            self.values = [f"{x}" for x in range(6)]
+            self.spin_box.setMaximum(5)
+            self.spin_box.setSingleStep(1)
+            self.spin_box.setValue(0)
         else:
-            self.values = []
+            self.spin_box.setValue(0)  # Default if nothing is selected
 
-        self.value_input.addItems(self.values)
-        self.value_label.setEnabled(bool(self.values))
-        self.value_input.setEnabled(bool(self.values))
+        self.spin_box.setEnabled(True)
+
 
     def update_komi(self, komi):
         """Update the selected Komi value."""
@@ -133,7 +140,7 @@ class HandicapDialog(QDialog):
                 else ("Pieces" if self.piece_radio.isChecked() else None)
             ),
             "value": (
-                self.value_input.currentText() if self.value_input.isEnabled() else None
+                self.spin_box.value() if self.spin_box.isEnabled() else None
             ),
             "komi": self.selected_komi,
         }

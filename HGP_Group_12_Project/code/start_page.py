@@ -18,6 +18,7 @@ class StartPage(QWidget):
         self.initUI()
 
     def initUI(self):
+
         layout = QVBoxLayout()
 
         # Add a space at the top to center vertically

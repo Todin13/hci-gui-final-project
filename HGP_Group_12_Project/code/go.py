@@ -13,6 +13,7 @@ class Go(QMainWindow):
 
     def initUI(self):
         """Initiates application UI"""
+        
         self.stackedWidget = QStackedWidget()
         self.setCentralWidget(self.stackedWidget)
 
