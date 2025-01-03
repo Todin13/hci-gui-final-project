@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 
 class HandicapDialog(QDialog):
 
-    player_index = {"White Player": 1, "Black Player":2, "None": 0}
+    player_index = {"White Player": 1, "Black Player": 2, "None": 0}
     index_to_player = {1: "White Player", 2: "Black Player", 0: "None"}
 
     def __init__(self, handicaps: dict):

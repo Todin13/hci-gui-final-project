@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QMessageBox
 # "value": None
 # "komi": "6.5",
 
+
 class GameLogic:
 
     __ko_state = False  # ko state round before, init as false
@@ -29,7 +30,7 @@ class GameLogic:
         self.__init_handicap(handicaps)
 
     def __init_handicap(self, handicaps):
-        
+
         self.__komi_p1 = float(handicaps["komi"])
         self.__komi_p2 = 0
 
@@ -356,12 +357,13 @@ class GameLogic:
                     actual_piece = self.board[row][col]
                     if actual_piece.state != final_state:
                         actual_piece.change_state(final_state)
-        
+
         message_box = QMessageBox()
         message_box.setWindowTitle("Ending game mode")
-        message_box.setText("Starting the ending game mode, select the dead piece to remove.")
+        message_box.setText(
+            "Starting the ending game mode, select the dead piece to remove."
+        )
         message_box.exec()
-
 
     def remove_dead_pieces_box(
         self, player_turn, selected_pieces: list[tuple[int, int]]

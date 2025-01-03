@@ -370,10 +370,12 @@ class Board(QFrame):
 
             message_box = QMessageBox()
             message_box.setWindowTitle("Placing Handicap Stone")
-            message_box.setText(f"{Piece(self.player_turn).name} need to place {self.logic.handicap_pieces_left}, before starting the game.")
+            message_box.setText(
+                f"{Piece(self.player_turn).name} need to place {self.logic.handicap_pieces_left}, before starting the game."
+            )
             message_box.exec()
 
-        else: 
+        else:
             message_box = QMessageBox()
             message_box.setWindowTitle("Starting Game")
             message_box.setText("No handicap stones, starting the game.")
@@ -514,7 +516,7 @@ class Board(QFrame):
 
             if self.logic.handicap_pieces_left > 1:
 
-                self.logic.handicap_pieces_left -=1
+                self.logic.handicap_pieces_left -= 1
 
             elif self.logic.handicap_pieces_left == 1:
 
@@ -523,7 +525,9 @@ class Board(QFrame):
 
                 message_box = QMessageBox()
                 message_box.setWindowTitle("Starting Game")
-                message_box.setText(f"{Piece(self.player_turn).name} player finished placing his handicap pieces.\nNow starting the game.")
+                message_box.setText(
+                    f"{Piece(self.player_turn).name} player finished placing his handicap pieces.\nNow starting the game."
+                )
                 message_box.exec()
 
                 self.player_turn = 2
