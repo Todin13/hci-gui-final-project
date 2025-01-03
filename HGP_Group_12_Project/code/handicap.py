@@ -28,7 +28,7 @@ class HandicapDialog(QDialog):
 
         self.init_ui()
 
-        self.setFixedSize(300, 200)
+        self.setFixedSize(400, 200)
 
     def init_ui(self):
         layout = QVBoxLayout()
