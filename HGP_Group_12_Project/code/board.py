@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QFrame, QDialog, QMessageBox
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
+from PyQt6.QtWidgets import QFrame, QDialog,  QMessageBox, QWidget, QLabel, QHBoxLayout, QStackedWidget
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QPoint, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPixmap, QKeyEvent
 from piece import Piece
 from game_logic import GameLogic
@@ -12,6 +12,7 @@ class Board(QFrame):
     updateTimerSignal = pyqtSignal(int)
     clickLocationSignal = pyqtSignal(str)
     resetGameSignal = pyqtSignal()  # Signal pour la réinitialisation du jeu
+    returnToMenuSignal = pyqtSignal()  # Nouveau signal pour retourner au menu
 
     boardWidth = 9  # 9x9 Goban
     boardHeight = 9
@@ -602,61 +603,55 @@ class Board(QFrame):
         white_score, black_score = self.logic.territory_scoring()
 
         if white_score > black_score:
-            msg = f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+            msg = QLabel(f"White player win by {white_score - black_score} points.\nWhite points: {white_score}\nBlack points: {black_score}")
         elif black_score > white_score:
-            msg = f"Black player win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}"
+            msg = QLabel(f"Black player win by {black_score - white_score} points.\nWhite points: {white_score}\nBlack points: {black_score}")
         else:
             msg = "Equality"
 
-        message_box = QMessageBox()
-        message_box.setWindowTitle("Winner")
-        message_box.setText(msg)
-
-        # Add "Return Menu" and "New Game" buttons
-        return_menu_button = QPushButton("Return Menu")
-        new_game_button = QPushButton("New Game")
+        game_over_window = QDialog(self)
+        game_over_window.setWindowTitle("Winner")
+        game_over_window.setFixedSize(300, 200)
 
         layout = QVBoxLayout()
-        layout.addWidget(return_menu_button)
-        layout.addWidget(new_game_button)
 
-        message_box.setLayout(layout)
+        layout.addWidget(msg)
 
-        # Connect buttons to their respective slots
+        # Buttons layout
+        buttons_layout = QHBoxLayout()
+
+        return_menu_button = QPushButton("Return Menu")
         return_menu_button.clicked.connect(self.return_to_menu)
-        new_game_button.clicked.connect(self.start_new_game)
+        buttons_layout.addWidget(return_menu_button)
 
-        message_box.exec()
+        new_game_button = QPushButton("New Game")
+        new_game_button.clicked.connect(self.start)
+        buttons_layout.addWidget(new_game_button)
 
-        self.triggerFireworksAnimation()
+        layout.addLayout(buttons_layout)
 
-    def resignGame(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            return
-        opponent = 3 - self.player_turn
-        msg = f"Winner is Player {opponent} because Player {self.player_turn} resigned"
-        QMessageBox.information(self, "Game Over", msg)
-        self.logic.stop()
-        self.start()
+        game_over_window.setLayout(layout)
+        game_over_window.exec()
 
-    def disputeNotAbout(self):
-        if self.logic.game_state() == 2 or self.logic.game_state() == 3:
-            QMessageBox.information(self, "Game Over", "Both players lose because the dispute did not resolve.")
-            self.logic.stop()
-            self.start()
+    def ask_handicap(self):
+        """
+        Aking box to choose handicaps
+        """
 
-        self.resetGame()  # Assurez-vous que le jeu est réinitialisé à la fin
+        dialog = HandicapDialog(self.handicap)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.handicap = dialog.get_results()
+        else:
+            self.handicap = {
+                "player": 0,
+                "type": None,
+                "value": None,
+                "komi": "6.5",
+            }
 
     def return_to_menu(self):
-        self.parent().stackedWidget.setCurrentWidget(self.parent().startPage)
-        self.parent().adjustSize()
-        self.parent().center()
-
-    def start_new_game(self):
-        self.parent().stackedWidget.setCurrentWidget(self.board)
-        self.start()
-        self.parent().adjustSize()
-        self.parent().center()
+        """Return to the main menu."""
+        self.returnToMenuSignal.emit()
 
     def resignGame(self):
         if self.logic.game_state() == 2 or self.logic.game_state() == 3:
@@ -690,15 +685,8 @@ class Board(QFrame):
                 "komi": "6.5",
             }
     def return_to_menu(self):
-        self.parent().stackedWidget.setCurrentWidget(self.parent().startPage)
-        self.parent().adjustSize()
-        self.parent().center()
-
-    def start_new_game(self):
-        self.parent().stackedWidget.setCurrentWidget(self.board)
-        self.start()
-        self.parent().adjustSize()
-        self.parent().center()
+        """Return to the main menu."""
+        self.returnToMenuSignal.emit()
 
     def triggerFireworksAnimation(self):
         firework_particles = []

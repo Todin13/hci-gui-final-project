@@ -52,7 +52,7 @@ class ScoreBoard(QDockWidget):
         self.button_next = QPushButton("Next Move")
 
         self.button_resign = QPushButton("Resign")
-        self.button_dispute_not_success = QPushButton("Dispute Not Succesful")
+        self.button_dispute_not_success = QPushButton("Dispute Not Successful")
         self.button_dispute_not_success.setVisible(False)
         self.button_reset = QPushButton("Reset Game")
 
