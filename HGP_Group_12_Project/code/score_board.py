@@ -73,6 +73,16 @@ class ScoreBoard(QDockWidget):
 
         self.setWidget(self.mainWidget)
 
+        # Navigation buttons for pending moves
+        self.button_prev = QPushButton("Previous Move")
+        self.button_next = QPushButton("Next Move")
+
+        # Add navigation buttons
+        navigationLayout = QHBoxLayout()
+        navigationLayout.addWidget(self.button_prev)
+        navigationLayout.addWidget(self.button_next)
+        self.mainLayout.addLayout(navigationLayout)
+
     def make_connection(self, board):
         """This handles a signal sent from the board class"""
         self.board = board  # Store the Board object
@@ -82,6 +92,11 @@ class ScoreBoard(QDockWidget):
         board.updateTimerSignal.connect(self.setTimeRemaining)
         self.button_pass.clicked.connect(self.pass_turn)
         self.button_reset.clicked.connect(self.resetGameSignal.emit)
+
+        # Connect navigation buttons to board methods
+        self.button_prev.clicked.connect(self.board.PreviousPendingMove)
+        self.button_next.clicked.connect(self.board.NextPendingMove)
+
 
     @pyqtSlot(
         str

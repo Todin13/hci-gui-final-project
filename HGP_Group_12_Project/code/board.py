@@ -224,15 +224,6 @@ class Board(QFrame):
 
         self.update_turn()
 
-    def keyPressEvent(self, event):
-        """Handle key presses for confirming or undoing moves."""
-        if event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Return:
-            self.confirmMove()  # Confirm move on Enter
-        if event.key() == Qt.Key.Key_Left:
-            self.PreviousPendingMove()
-        if event.key() == Qt.Key.Key_Right:
-            self.NextPendingMove()
-
     def mouseMoveEvent(self, event):
         """Track the mouse position and determine the hovered position."""
         if self.logic.game_state() == 1:
