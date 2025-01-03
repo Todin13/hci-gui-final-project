@@ -9,7 +9,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
 
-
 class ScoreBoard(QDockWidget):
     """Base the score_board on a QDockWidget"""
 
@@ -59,10 +58,17 @@ class ScoreBoard(QDockWidget):
         self.button_dispute_not_success.setVisible(False)
         self.button_reset = QPushButton("Reset Game")
 
-        self.button_rules = QPushButton("Rules of Ko and Suicide")
+        # Create top bar with Rules and Controls buttons
+        self.topBar = QWidget()
+        self.topBarLayout = QHBoxLayout()
+        self.button_rules = QPushButton("Rules")
         self.button_controls = QPushButton("Controls")
+        self.topBarLayout.addWidget(self.button_rules)
+        self.topBarLayout.addWidget(self.button_controls)
+        self.topBar.setLayout(self.topBarLayout)
 
         self.mainWidget.setLayout(self.mainLayout)
+        self.mainLayout.addWidget(self.topBar)  # Add the top bar
         self.mainLayout.addWidget(self.label_clickLocation)
         self.mainLayout.addWidget(self.label_timeRemaining)
 
@@ -93,9 +99,6 @@ class ScoreBoard(QDockWidget):
         self.mainLayout.addWidget(self.button_resign)
         self.mainLayout.addWidget(self.button_dispute_not_success)
         self.mainLayout.addWidget(self.button_reset)
-
-        self.mainLayout.addWidget(self.button_rules)
-        self.mainLayout.addWidget(self.button_controls)
 
         self.setWidget(self.mainWidget)
 
