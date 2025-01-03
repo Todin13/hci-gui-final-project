@@ -27,6 +27,9 @@ class ScoreBoard(QDockWidget):
         self.pass_count = 0  # Counter for consecutive passes
         self.last_player_passed = None  # Track the last player who passed
         self.board = None  # Attribute to store the Board object
+        self.gamemode = 0  # 0 for normal game, 1 for blitz game
+        self.time_remaining_p1 = 0
+        self.time_remaining_p2 = 0
 
     def initUI(self):
         """Initiates ScoreBoard UI"""
@@ -39,13 +42,14 @@ class ScoreBoard(QDockWidget):
 
         # Create labels and buttons
         self.label_clickLocation = QLabel("Click Location: ")
-        self.label_timeRemaining = QLabel("Time remaining: ")
-        self.label_player1 = QLabel("Player 1: ")
-        self.label_player2 = QLabel("Player 2: ")
-        self.label_prisoners_p1 = QLabel("Prisoners P1: 0")
-        self.label_prisoners_p2 = QLabel("Prisoners P2: 0")
-        self.label_territory_p1 = QLabel("Territory P1: 0")
-        self.label_territory_p2 = QLabel("Territory P2: 0")
+        self.label_timeRemaining_p1 = QLabel("Time Remaining White Player: ")
+        self.label_timeRemaining_p2 = QLabel("Time Remaining Black Player: ")
+        self.label_player1 = QLabel("White Player: ")
+        self.label_player2 = QLabel("Black Player: ")
+        self.label_prisoners_p1 = QLabel("White's Prisoners: 0")
+        self.label_prisoners_p2 = QLabel("White's Prisoners: 0")
+        self.label_territory_p1 = QLabel("White Territory: 0")
+        self.label_territory_p2 = QLabel("Black Territory: 0")
         self.label_turn = QLabel("Turn: ")
 
         self.button_pass = QPushButton("Pass")
@@ -59,12 +63,20 @@ class ScoreBoard(QDockWidget):
         self.button_dispute_not_success.setVisible(False)
         self.button_reset = QPushButton("Reset Game")
 
-        self.button_rules = QPushButton("Rules of Ko and Suicide")
+        # Create top bar with Rules and Controls buttons
+        self.topBar = QWidget()
+        self.topBarLayout = QHBoxLayout()
+        self.button_rules = QPushButton("Rules")
         self.button_controls = QPushButton("Controls")
+        self.topBarLayout.addWidget(self.button_rules)
+        self.topBarLayout.addWidget(self.button_controls)
+        self.topBar.setLayout(self.topBarLayout)
 
         self.mainWidget.setLayout(self.mainLayout)
+        self.mainLayout.addWidget(self.topBar)  # Add the top bar
         self.mainLayout.addWidget(self.label_clickLocation)
-        self.mainLayout.addWidget(self.label_timeRemaining)
+        self.mainLayout.addWidget(self.label_timeRemaining_p1)
+        self.mainLayout.addWidget(self.label_timeRemaining_p2)
 
         playerLayout = QHBoxLayout()
         playerLayout.addWidget(self.label_player1)
@@ -94,13 +106,14 @@ class ScoreBoard(QDockWidget):
         self.mainLayout.addWidget(self.button_dispute_not_success)
         self.mainLayout.addWidget(self.button_reset)
 
-        self.mainLayout.addWidget(self.button_rules)
-        self.mainLayout.addWidget(self.button_controls)
-
         self.setWidget(self.mainWidget)
 
         self.button_rules.clicked.connect(self.showKoSuicideRules)
         self.button_controls.clicked.connect(self.showControls)
+
+        # Hide time remaining labels initially
+        self.label_timeRemaining_p1.setVisible(False)
+        self.label_timeRemaining_p2.setVisible(False)
 
     def make_connection(self, board):
         """This handles a signal sent from the board class"""
@@ -128,21 +141,35 @@ class ScoreBoard(QDockWidget):
         self.label_clickLocation.setText("Click Location: " + clickLoc)
         # print("slot " + clickLoc)
 
-    @pyqtSlot(int)
-    def setTimeRemaining(self, timeRemaining):
+    @pyqtSlot(int, int)
+    def setTimeRemaining(self, timeRemaining_p1, timeRemaining_p2):
         """Updates the time remaining label to show the time remaining"""
-        update = "Time Remaining: " + str(timeRemaining)
-        self.label_timeRemaining.setText(update)
+        self.time_remaining_p1 = timeRemaining_p1
+        self.time_remaining_p2 = timeRemaining_p2
+        if self.gamemode == 1:  # Blitz game
+            minutes_p1 = timeRemaining_p1 // 60
+            seconds_p1 = timeRemaining_p1 % 60
+            minutes_p2 = timeRemaining_p2 // 60
+            seconds_p2 = timeRemaining_p2 % 60
+            update_p1 = f"Time Remaining White player: {minutes_p1:02}:{seconds_p1:02}"
+            update_p2 = f"Time Remaining Black player: {minutes_p2:02}:{seconds_p2:02}"
+            self.label_timeRemaining_p1.setText(update_p1)
+            self.label_timeRemaining_p2.setText(update_p2)
+            self.label_timeRemaining_p1.setVisible(True)
+            self.label_timeRemaining_p2.setVisible(True)
+        else:
+            self.label_timeRemaining_p1.setVisible(False)
+            self.label_timeRemaining_p2.setVisible(False)
         # print("slot " + str(timeRemaining))
         # self.redraw()
 
     def updatePrisoners(self, prisoners_p1, prisoners_p2):
-        self.label_prisoners_p1.setText(f"Prisoners P1: {prisoners_p1}")
-        self.label_prisoners_p2.setText(f"Prisoners P2: {prisoners_p2}")
+        self.label_prisoners_p1.setText(f"White's Prisoners: {prisoners_p1}")
+        self.label_prisoners_p2.setText(f"Black's Prisoners: {prisoners_p2}")
 
     def updateTerritory(self, territory_p1, territory_p2):
-        self.label_territory_p1.setText(f"Territory P1: {territory_p1}")
-        self.label_territory_p2.setText(f"Territory P2: {territory_p2}")
+        self.label_territory_p1.setText(f"White Territory: {territory_p1}")
+        self.label_territory_p2.setText(f"Black Territory: {territory_p2}")
 
     def updateTurn(self, player_turn):
         color = "black" if player_turn == 2 else "white"
@@ -160,15 +187,17 @@ class ScoreBoard(QDockWidget):
         QMessageBox.information(self, "Rules of Ko and Suicide", rules)
 
     def updatePlayerNames(self, player1, player2):
-        self.label_player1.setText(f"Player 1: {player1}")
-        self.label_player2.setText(f"Player 2: {player2}")
+        self.label_player1.setText(f"White Player: {player1}")
+        self.label_player2.setText(f"Black Player: {player2}")
 
     def showControls(self):
         controls = (
             "- Click on a free space to add a temporary Stone.\n\n"
             "- Click again on the current temporary Stone to confirm the move.\n\n"
-            "- Press Left arrow or Right arrow to navigate through your temporary Stones\n\n\n"
             '- Click on "Pass" to pass your turn.\nReminder: 2 passes = end of game\n\n'
+            '- Click on "Previous Move" and "Next Move" to navigate between all of your tempory place stone\n\n'
+            '- Click on "Resign" to declare forfeit\n\n'
+            '- Click on "Dispute Not Successful" if you don\'t find an agreement during the dispute phase'
             '- Click on "Reset Game" to clear the board and restart.'
         )
         QMessageBox.information(self, "Controls", controls)
