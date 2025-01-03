@@ -91,7 +91,7 @@ class Go(QMainWindow):
             self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scoreBoard)
             self.scoreBoard.passTurnSignal.connect(self.pass_turn)
             self.scoreBoard.updatePlayerNames(
-                "Player 1", "Player 2"
+                "White Player", "Black Player"
             )  # Update player names
             print("New game started")
 

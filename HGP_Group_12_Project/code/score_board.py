@@ -39,12 +39,12 @@ class ScoreBoard(QDockWidget):
         # Create labels and buttons
         self.label_clickLocation = QLabel("Click Location: ")
         self.label_timeRemaining = QLabel("Time remaining: ")
-        self.label_player1 = QLabel("Player 1: ")
-        self.label_player2 = QLabel("Player 2: ")
-        self.label_prisoners_p1 = QLabel("Prisoners P1: 0")
-        self.label_prisoners_p2 = QLabel("Prisoners P2: 0")
-        self.label_territory_p1 = QLabel("Territory P1: 0")
-        self.label_territory_p2 = QLabel("Territory P2: 0")
+        self.label_player1 = QLabel("White Player: ")
+        self.label_player2 = QLabel("Black Player: ")
+        self.label_prisoners_p1 = QLabel("White's Prisoners: 0")
+        self.label_prisoners_p2 = QLabel("White's Prisoners: 0")
+        self.label_territory_p1 = QLabel("White Territory: 0")
+        self.label_territory_p2 = QLabel("Black Territory: 0")
         self.label_turn = QLabel("Turn: ")
 
         self.button_pass = QPushButton("Pass")
@@ -140,12 +140,12 @@ class ScoreBoard(QDockWidget):
         # self.redraw()
 
     def updatePrisoners(self, prisoners_p1, prisoners_p2):
-        self.label_prisoners_p1.setText(f"Prisoners P1: {prisoners_p1}")
-        self.label_prisoners_p2.setText(f"Prisoners P2: {prisoners_p2}")
+        self.label_prisoners_p1.setText(f"White's Prisoners: {prisoners_p1}")
+        self.label_prisoners_p2.setText(f"Black's Prisoners: {prisoners_p2}")
 
     def updateTerritory(self, territory_p1, territory_p2):
-        self.label_territory_p1.setText(f"Territory P1: {territory_p1}")
-        self.label_territory_p2.setText(f"Territory P2: {territory_p2}")
+        self.label_territory_p1.setText(f"White Territory: {territory_p1}")
+        self.label_territory_p2.setText(f"Black Territory: {territory_p2}")
 
     def updateTurn(self, player_turn):
         color = "black" if player_turn == 2 else "white"
@@ -163,8 +163,8 @@ class ScoreBoard(QDockWidget):
         QMessageBox.information(self, "Rules of Ko and Suicide", rules)
 
     def updatePlayerNames(self, player1, player2):
-        self.label_player1.setText(f"Player 1: {player1}")
-        self.label_player2.setText(f"Player 2: {player2}")
+        self.label_player1.setText(f"White Player: {player1}")
+        self.label_player2.setText(f"Black Player: {player2}")
 
     def showControls(self):
         controls = (
