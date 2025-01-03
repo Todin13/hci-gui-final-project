@@ -139,6 +139,13 @@ class ScoreBoard(QDockWidget):
         self.label_turn.setText(f"Turn: Player {player_turn} ({color}) to play")
 
     def pass_turn(self):
+        self.pass_count += 1
+        if self.pass_count >= 2:
+            QMessageBox.information(self, "Dispute not about situation", "Dispute not about situation")
+            self.button_dispute_not_about.setVisible(True)  # Show the button
+            self.pass_count = 0  # Reset the pass count
+        else:
+            self.button_dispute_not_about.setVisible(False)  # Hide the button if not two consecutive passes
         self.passTurnSignal.emit()
 
 

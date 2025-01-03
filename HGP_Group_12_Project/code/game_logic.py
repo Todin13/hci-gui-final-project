@@ -2,12 +2,6 @@ from piece import Piece
 from copy import deepcopy
 from PyQt6.QtWidgets import QMessageBox
 
-# "player": "None"
-# "type": None
-# "value": None
-# "komi": "6.5",
-
-
 class GameLogic:
 
     __ko_state = False  # ko state round before, init as false

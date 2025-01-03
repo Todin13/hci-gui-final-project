@@ -193,6 +193,7 @@ class Board(QFrame):
                 else:
                     self.logic.dead_pieces_debate()
 
+
     def PreviousPendingMove(self):
         """Go to the previous pending move."""
         if not self.pending_moves:
