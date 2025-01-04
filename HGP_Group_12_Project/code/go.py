@@ -37,21 +37,20 @@ class Go(QMainWindow):
         self.startPage.newGameSignal.connect(self.showPlayerNamesPage)
         self.playerNamesPage.startGameSignal.connect(self.startGame)
 
+        self.board.returnToMenuSignal.connect(
+            self.showStartPage
+        )
         self.board.resetGameSignal.connect(
             self.resetGame
-        )  # Connecter le signal de réinitialisation
-        self.scoreBoard.resetGameSignal.connect(
-            self.resetGame
-        )  # Connecter le signal de réinitialisation
+        )
         self.scoreBoard.resignSignal.connect(
             self.confirmResign
-        )  # Connecter le signal de résignation
+        )
         self.scoreBoard.disputeNotSuccessingSignal.connect(
             self.confirmDisputeNotSuccessful
-        )  # Connecter le signal de dispute
-        # self.board.returnToMenuSignal.connect(self.showStartPage)  # Connecter le signal pour retourner au menu
+        )
 
-        self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
+        self.adjustSize()
         self.center()
         self.setWindowTitle("Go game")
         self.show()
@@ -69,10 +68,16 @@ class Go(QMainWindow):
         y = (screen.height() - window_size.height()) // 2
         self.move(x, y)
 
+    def showStartPage(self):
+        self.stackedWidget.setCurrentWidget(self.startPage)
+        self.adjustSize()
+        self.center()
+        self.initUI()
+
     def showPlayerNamesPage(self, gamemode):
         self.stackedWidget.setCurrentWidget(self.playerNamesPage)
-        self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
-        self.center()  # Centre la fenêtre
+        self.adjustSize()
+        self.center()
         self.board.gamemode = gamemode
 
     def startGame(self, player1=None, player2=None):
@@ -84,6 +89,8 @@ class Go(QMainWindow):
             self.scoreBoard.passTurnSignal.connect(self.pass_turn)
             self.scoreBoard.gamemode = self.board.gamemode
             self.scoreBoard.updatePlayerNames(player1, player2)  # Update player names
+            if not self.scoreBoard.isVisible():
+                self.scoreBoard.setVisible(True)
             print(f"Game started with players: {player1} vs {player2}")
         else:
             self.stackedWidget.setCurrentWidget(self.board)
@@ -95,10 +102,12 @@ class Go(QMainWindow):
             self.scoreBoard.updatePlayerNames(
                 "White Player", "Black Player"
             )  # Update player names
+            if not self.scoreBoard.isVisible():
+                self.scoreBoard.setVisible(True)
             print("New game started")
 
-        self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
-        self.center()  # Centre la fenêtre
+        self.adjustSize()
+        self.center()
 
     def pass_turn(self):
         self.board.update_turn(True)
@@ -131,11 +140,6 @@ class Go(QMainWindow):
         )
         if reply == QMessageBox.StandardButton.Yes:
             self.disputeNotSuccessing()
-
-    # def showStartPage(self):
-    #     self.stackedWidget.setCurrentWidget(self.startPage)
-    #     self.adjustSize()  # Ajuste la taille de la fenêtre en fonction du contenu
-    #     self.center()  # Centre la fenêtre
 
     def resignGame(self):
         self.board.resignGame()

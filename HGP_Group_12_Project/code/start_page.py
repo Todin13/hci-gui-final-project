@@ -89,6 +89,7 @@ class StartPage(QWidget):
         button_normal_game.clicked.connect(
             lambda: self.newGameSignal.emit(0)
         )  # Connect to the new game signal
+        button_normal_game.clicked.connect(self.initUI)
         button_normal_game.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
@@ -99,6 +100,7 @@ class StartPage(QWidget):
         button_blitz_game.clicked.connect(
             lambda: self.newGameSignal.emit(1)
         )  # Connect to the new game signal
+        button_blitz_game.clicked.connect(self.initUI)
         button_blitz_game.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
         )
